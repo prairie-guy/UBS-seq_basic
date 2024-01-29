@@ -1,5 +1,19 @@
 # UBS-seq_basic
 
+The purpose of this project is run a minimally viable UBS-seq pipline. For simplicity, it will run several single-end samples, mapping only to the genome. The core steps of the pipeline are:
+- cut_apapter
+- quality_control
+- align2ref
+- sort2ref
+- dedupe
+- filter->all_multi_unique
+- call_peaks
+- select_groups
+- analysis_and_annotation
+
+This pipeline is based upon the paper by [Qing Dai, etal](https://doi.org/10.1038/s41587-023-02034-w) and the UBS-seq pipeline developed by [Chang Ye](https://github.com/y9c/m5C-UBSseq)
+
+
 ### Directories and Files added to .gitignore
 - data/
 - reference/
