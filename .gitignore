@@ -1,9 +1,9 @@
 .snakemake/
 reference/
-data/
 !data/*.py
 !data/*.ipynb
-workspace
+data/
 !workspace/*.py
 !workspace/*.ipynb
+workspace
 .*~
