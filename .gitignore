@@ -1,8 +1,8 @@
 reference/
-data
+data/*
 !data/*.py
 !data/*.ipynb
-workspace
+workspace/*
 !workspace/*.py
 !workspace/*.ipynb
 .*~
