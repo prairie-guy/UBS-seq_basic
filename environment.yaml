@@ -1,0 +1,30 @@
+channels:
+  - conda-forge
+  - bioconda
+
+dependencies:
+  - python
+  - cutadapt
+  - falco
+  - umicollapse
+  - samtools
+  - parallel
+  - umi_tools
+  - quarto
+  - ipython
+  - jupyterlab
+  - numpy
+  - pandas
+  - snakemake
+  - pandoc
+  - wget
+  - seqkit
+  - csvkit
+  - seqtk
+  - bcftools
+  - bioawk
+  - fastqc
+  - csvtk
+  - fastp
+  - ncbi-datasets-cli
+  - bedtools
