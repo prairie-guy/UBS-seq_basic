@@ -15,10 +15,16 @@ This pipeline is based upon the paper by [Qing Dai, etal](https://doi.org/10.103
 
 
 ### Directories and Files added to .gitignore
-- data/
+
 - reference/
-- scr/
-- .*~ 
+- data/
+- !data/*.py
+- !data/*.ipynb
+- workspace
+- !workspace/*.py
+-!workspace/*.ipynb
+.*~
+- .snakemake/
 
 ### How to create `reference/`
 
