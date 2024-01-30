@@ -58,6 +58,7 @@ reference:
 - scripts/generate_reference.sh
 
 ### Downsize Samples to ~ 10 milllion reads per file
+- cd data
 - ls *.fastq | parallel 'seqkit sample -p 0.01 {} | gzip > test{= s/SRR2353829(.*)\.fastq/\1/; =}_R1.fq.gz'
 
 
