@@ -7,3 +7,4 @@ workspace/*
 !workspace/*.ipynb
 .*~
 .snakemake/
+src/hisat-3n/
