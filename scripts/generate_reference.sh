@@ -3,7 +3,7 @@
 pd=`pwd`
 
 genome=$pd/reference/genome
-index=$pd/reference/index/hist3n
+index=$pd/reference/index/hisat3n
 
 gen_cont=$genome/contamination
 gen_snc=$genome
