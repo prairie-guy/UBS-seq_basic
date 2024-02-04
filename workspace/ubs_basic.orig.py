@@ -35,22 +35,12 @@
 # 6. The function **mkpath(step)** returns a path for a dir **Step**. It will create a dir if need be, but not overwrite an existing dir
 # 8. The function **fname(path,sample,suffix)** returns a file name without actually creating the file
 
-# #### Execution from Command Line
-
-# - cd workplace/
-# - juptyer nbconvert ubs_basic.ipynb --to script
-# - ipython ubs_basic.py
-
 # #### Environment
 
-# In[84]:
+# Added by cbd
+from IPython import *
 
-
-start = get_ipython().getoutput(" echo 'ubs_basic.ipnby | ubs_basic.py STARTED:' `date`;")
-start = start[0]; start
-
-
-# In[2]:
+# In[1]:
 
 
 import os, sys, subprocess
@@ -62,7 +52,7 @@ from IPython.display import display, HTML
 from snakemake import load_configfile
 
 
-# In[3]:
+# In[2]:
 
 
 def fname(path, base, sufix):
@@ -82,7 +72,7 @@ def mkpath(path):
 # 
 # `Note:` Github ignores the data/, workspace/ and reference directories, except for `.py` and `.ipynb` files
 
-# In[4]:
+# In[3]:
 
 
 home_path      = Path.cwd()/'..'
@@ -92,27 +82,27 @@ workspace_path = home_path/'workspace'
 
 # Use `config.yaml` to configure `references/`, but not samples in `data/`
 
-# In[5]:
+# In[4]:
 
 
 config = load_configfile("../config.yaml")
 
 
-# In[6]:
+# In[5]:
 
 
 genome_fa  = home_path/config['reference']['genome']['fa'].removeprefix('~/')
 genome_idx = home_path/config['reference']['genome']['hisat3n'].removeprefix('~/')
 
 
-# In[7]:
+# In[6]:
 
 
 #genome_fa = ref_path/'genome/Homo_sapiens.GRCh38.genome.fa'
 #genome_idx = ref_path/'index/hist3n/Homo_sapiens.GRCh38.genome'
 
 
-# In[8]:
+# In[7]:
 
 
 # Add to shell PATH
@@ -121,14 +111,7 @@ os.environ['PATH'] = '/home/cdaniels/bin/homer:' + os.environ['PATH'] # homer
 os.environ['PATH'] = '/home/cdaniels/bin/hisat-3n:' + os.environ['PATH'] # hisat-3n
 
 
-# In[9]:
-
-
-# Set Java Flag
-os.environ['_JAVA_OPTIONS'] = '-Xmx8g'
-
-
-# In[10]:
+# In[8]:
 
 
 # Number of cores                                                                                                                                                                                               
@@ -139,7 +122,7 @@ nc
 
 # #### Functions
 
-# In[11]:
+# In[9]:
 
 
 def nlines(file):
@@ -149,7 +132,7 @@ def nlines(file):
     return n
 
 
-# In[12]:
+# In[10]:
 
 
 def nseqs(bam_fastq):
@@ -158,7 +141,7 @@ def nseqs(bam_fastq):
     return int(n[0])
 
 
-# In[13]:
+# In[11]:
 
 
 def samples_string(samples,path,suffix='bam'):
@@ -166,7 +149,7 @@ def samples_string(samples,path,suffix='bam'):
     return " ".join([str(fname(path,sample,suffix)) for sample in samples])    
 
 
-# In[14]:
+# In[12]:
 
 
 def make_table(ds1, ds2, ds1_name, ds2_name, y_label=None, xs_labels=None, table_label=None):
@@ -185,7 +168,7 @@ def make_table(ds1, ds2, ds1_name, ds2_name, y_label=None, xs_labels=None, table
     plt.show()
 
 
-# In[15]:
+# In[13]:
 
 
 def make_histogram(ds, ds_name, table_label=None, y_label="Frequency", density=True):
@@ -203,7 +186,7 @@ def make_histogram(ds, ds_name, table_label=None, y_label="Frequency", density=T
 
 # #### Select Samples and Filenames
 
-# In[16]:
+# In[14]:
 
 
 out_path = mkpath('samples')
@@ -211,7 +194,7 @@ out_path = mkpath('samples')
 
 # #### Project definitions for treated samples, control samples
 
-# In[17]:
+# In[15]:
 
 
 # short sample names
@@ -220,20 +203,20 @@ control = [] # Edit
 samples = treated + control
 
 
-# In[18]:
+# In[16]:
 
 
 samples
 
 
-# In[19]:
+# In[17]:
 
 
 # sample filenames
 samples_fn = [data_path/'test0_R1.fq.gz', data_path/'test1_R1.fq.gz', data_path/'test2_R1.fq.gz']
 
 
-# In[20]:
+# In[18]:
 
 
 # dict
@@ -241,7 +224,7 @@ s2fn = {name: fname for (name,fname) in zip(samples,samples_fn)};
 s2fn
 
 
-# In[21]:
+# In[19]:
 
 
 for (s,fn) in s2fn.items():
@@ -250,15 +233,15 @@ for (s,fn) in s2fn.items():
 
 # Check that the files look correct
 
-# In[22]:
+# In[20]:
 
 
-get_ipython().system('ls -lLh {out_path}')
+get_ipython().system('ls  {out_path}')
 
 
 # How many sequence reads do we have per Sample
 
-# In[23]:
+# In[21]:
 
 
 # Total Reads per Samples
@@ -272,7 +255,7 @@ for f in files:
 
 # #### Pre Trimming Quality Control
 
-# In[24]:
+# In[22]:
 
 
 in_path = mkpath("samples")
@@ -281,7 +264,7 @@ out_path = mkpath("fastqc_pre")
 
 # #### fastqc
 
-# In[25]:
+# In[23]:
 
 
 get_ipython().system(' fastqc --help')
@@ -290,14 +273,14 @@ get_ipython().system(' fastqc --help')
 # ##### paramaters:
 # - -o output dir
 
-# In[26]:
+# In[24]:
 
 
 for sample in samples:
     get_ipython().system(' fastqc {fname(in_path,sample,"fq.gz")} -o {out_path} 2> /dev/null')
 
 
-# In[27]:
+# In[25]:
 
 
 get_ipython().system(' ls {out_path}')
@@ -307,14 +290,14 @@ get_ipython().system(' ls {out_path}')
 
 # #### Trim the adapter and downstream sequence as well as trimmng lower quality downstream sequence
 
-# In[28]:
+# In[26]:
 
 
 in_path = mkpath("samples")
 out_path = mkpath("trim")
 
 
-# In[29]:
+# In[27]:
 
 
 adapter =  "AGATCGGAAGAGCACACGTCT"
@@ -323,7 +306,7 @@ barcode3 = "ATCACG"
 #barcode3 = "TATCACGATCACG"
 
 
-# In[30]:
+# In[28]:
 
 
 get_ipython().system('ls {in_path}')
@@ -331,7 +314,7 @@ get_ipython().system('ls {in_path}')
 
 # #### cutadapt
 
-# In[31]:
+# In[29]:
 
 
 get_ipython().system(' cutadapt --help')
@@ -373,7 +356,7 @@ get_ipython().system(' cutadapt --help')
 
 # **NOTE:** Added `--length 30` to cutoff reads where C begin to become more common. Not in original code
 
-# In[32]:
+# In[30]:
 
 
 for sample in samples:
@@ -384,7 +367,7 @@ for sample in samples:
 
 # Take a look at a FASTQ file
 
-# In[33]:
+# In[31]:
 
 
 in_fn  = fname(in_path,treated[0],'fq.gz')
@@ -392,13 +375,13 @@ out_fn = fname(out_path,treated[0],'fq.gz')
 in_fn
 
 
-# In[34]:
+# In[32]:
 
 
 get_ipython().system(' zcat {in_fn}|head -16')
 
 
-# In[35]:
+# In[33]:
 
 
 def show_adapter(reads):
@@ -409,7 +392,7 @@ def show_adapter(reads):
 
 # Look for adapter in untrimmed reads
 
-# In[36]:
+# In[34]:
 
 
 reads = get_ipython().getoutput(" zcat {in_fn} | head -36  | seqtk seq -A |grep -v '>'")
@@ -419,7 +402,7 @@ show_adapter(reads)
 
 # Verify that adapters and all downstream elements of reads have been trimmed
 
-# In[37]:
+# In[35]:
 
 
 reads = get_ipython().getoutput("zcat {out_fn}| head -256  | seqtk seq -A |grep -v '>'")
@@ -431,13 +414,13 @@ show_adapter(reads)
 # 
 # Looks like 
 
-# In[38]:
+# In[36]:
 
 
 get_ipython().system('zcat {in_fn}| head -2')
 
 
-# In[39]:
+# In[37]:
 
 
 get_ipython().system('zcat {out_fn}| head -2')
@@ -447,7 +430,7 @@ get_ipython().system('zcat {out_fn}| head -2')
 
 # No reads should have been deleted with cutadapt. Veryify that number of reads before and after cutadapt are the same.
 
-# In[40]:
+# In[38]:
 
 
 # Untrimmed
@@ -456,7 +439,7 @@ ins = [nseqs(f) for f in files]
 ins
 
 
-# In[41]:
+# In[39]:
 
 
 # Adapter Trimmed Reads
@@ -465,7 +448,7 @@ ins = [nseqs(f) for f in files]
 ins
 
 
-# In[42]:
+# In[40]:
 
 
 # Too Short Reads
@@ -476,7 +459,7 @@ ins
 
 # Compare the sum of read lengths in the original and adapter trimmed files
 
-# In[43]:
+# In[41]:
 
 
 files = [fname(in_path,sample, "fq.gz") for sample in samples]
@@ -488,7 +471,7 @@ ins = res
 ins
 
 
-# In[44]:
+# In[42]:
 
 
 files = [fname(out_path,sample, "fq.gz") for sample in samples]
@@ -500,13 +483,13 @@ outs = res
 outs
 
 
-# In[45]:
+# In[43]:
 
 
 make_table(ins, outs, "Origs", "Trimmed", "Sum of Total Read Lengths", samples, "Sum of Total Reads Per Sample")
 
 
-# In[46]:
+# In[44]:
 
 
 reads = get_ipython().getoutput('xargs zcat {out_path}/*.gz | seqtk seq -A  |grep -v ">"')
@@ -518,14 +501,14 @@ make_histogram(ds, "Read Length", "Trimmed Reads")
 
 # #### Post Trimming Quality Control
 
-# In[47]:
+# In[45]:
 
 
 in_path = mkpath("trim")
 out_path = mkpath("fastqc_post")
 
 
-# In[48]:
+# In[46]:
 
 
 for sample in samples:
@@ -534,13 +517,13 @@ for sample in samples:
 
 # #### Consolidate fastqc Reports
 
-# In[49]:
+# In[47]:
 
 
 get_ipython().system('multiqc -f -fp -m fastqc -n multiqc -o {out_path} {out_path}')
 
 
-# In[50]:
+# In[48]:
 
 
 get_ipython().system(' ls {out_path}')
@@ -550,7 +533,7 @@ get_ipython().system(' ls {out_path}')
 
 # #### Align Samples to Genome with Hisat-3n
 
-# In[51]:
+# In[49]:
 
 
 in_path = mkpath("trim")
@@ -561,7 +544,7 @@ out_path = mkpath("hisat3n_align")
 
 # http://daehwankimlab.github.io/hisat2/hisat-3n/
 
-# In[52]:
+# In[50]:
 
 
 get_ipython().system(' hisat-3n --help')
@@ -596,7 +579,7 @@ get_ipython().system(' hisat-3n --help')
 # - --un {output.fq}, write unpaired reads that didn't align to <path> 
 # - -S {output.sam}, File for SAM output (default: stdout)
 
-# In[53]:
+# In[ ]:
 
 
 for sample in samples:
@@ -605,25 +588,25 @@ for sample in samples:
 
 # #### Analysis
 
-# In[54]:
+# In[ ]:
 
 
 get_ipython().system('ls -lh {out_path}')
 
 
-# In[55]:
+# In[ ]:
 
 
 get_ipython().system(' cat {out_path}/t1.summary')
 
 
-# In[56]:
+# In[ ]:
 
 
 get_ipython().system(' head -8 {out_path}/t1.unmapped.fq')
 
 
-# In[57]:
+# In[ ]:
 
 
 get_ipython().system(" grep -v '@' {out_path}/t1.sam |head -1")
@@ -633,7 +616,7 @@ get_ipython().system(" grep -v '@' {out_path}/t1.sam |head -1")
 
 # #### Sort and Index Hisat3n Sam Files
 
-# In[58]:
+# In[ ]:
 
 
 in_path = mkpath("hisat3n_align")
@@ -670,7 +653,7 @@ out_path = mkpath("hisat3n_sort")
 #     -o {output} -
 # ```
 
-# In[59]:
+# In[ ]:
 
 
 for sample in samples:
@@ -679,7 +662,7 @@ for sample in samples:
 
 # #### Analysis
 
-# In[60]:
+# In[ ]:
 
 
 get_ipython().system(' ls -lh {out_path}')
@@ -689,7 +672,7 @@ get_ipython().system(' ls -lh {out_path}')
 
 # #### Remove Dulpicate Reads
 
-# In[61]:
+# In[ ]:
 
 
 in_path = mkpath("hisat3n_sort")
@@ -709,7 +692,7 @@ out_path = mkpath("hisat3n_dedup")
 #       > {output.log}
 # ```
 
-# In[62]:
+# In[ ]:
 
 
 for sample in samples:
@@ -718,13 +701,13 @@ for sample in samples:
 
 # #### Analysis
 
-# In[63]:
+# In[ ]:
 
 
-get_ipython().system(' ls -lh {out_path}')
+get_ipython().system(' ls -h {out_path}')
 
 
-# In[64]:
+# In[ ]:
 
 
 get_ipython().system(' cat {out_path}/t1.log')
@@ -734,7 +717,7 @@ get_ipython().system(' cat {out_path}/t1.log')
 
 # #### Call Converted bases
 
-# In[74]:
+# In[ ]:
 
 
 in_path = mkpath("hisat3n_dedup")
@@ -757,7 +740,7 @@ out_path = mkpath("hisat3n_call")
 #     bgzip -@ {threads} -c > {output}
 # ```
 
-# In[66]:
+# In[ ]:
 
 
 for sample in samples:
@@ -766,10 +749,10 @@ for sample in samples:
 
 # #### Analysis
 
-# In[75]:
+# In[ ]:
 
 
-get_ipython().system(' ls -lh {out_path}')
+get_ipython().system(' ls -h {out_path}')
 
 
 # There are 7 columns in the 3N-conversion-table:
@@ -782,61 +765,34 @@ get_ipython().system(' ls -lh {out_path}')
 # 6. `unconvertedBaseQualities:` the qualities for unconverted base in read-level measurement. Length of this string is equal to the number of unconverted Base in read-level measurement.
 # 7. `unconvertedBaseCount:` number of distinct read positions where unconverted base in read-level measurements were found. this number should equal to the length of unconvertedBaseQualities.
 
-# In[68]:
+# In[ ]:
 
 
 get_ipython().system(' zcat {out_path}/t1.tsv.gz |head -20')
 
 
-# In[101]:
+# In[ ]:
 
 
-df = pd.read_csv(out_path/'t1.tsv.gz', sep='\t', compression='gzip', low_memory=False, dtype={4: int, 6: int })
+df = pd.read_csv(out_path/'t1.tsv.gz', sep='\t', compression='gzip', low_memory=False, dtype={4: int, 6: int, })
 
 
-# In[133]:
-
-
-p1 = len(df[df.unconvertedBaseCount == 1])/len(df);
-p1
-
-
-# In[136]:
-
-
-p2 = len(df[df.unconvertedBaseCount == 2])/len(df);
-p2
-
-
-# In[137]:
-
-
-p3 = len(df[df.unconvertedBaseCount == 3])/len(df);
-p3
-
-
-# In[132]:
-
-
-p1*p1
-
-
-# In[111]:
+# In[ ]:
 
 
 df2 = df[(df['unconvertedBaseCount'] > 1) &  (df['unconvertedBaseCount'] > df['convertedBaseCount'])]
 
 
-# In[118]:
+# In[ ]:
 
 
-df2.to_csv(out_path/'t1_filtered.csv',index=False)  # Set index=False if you don't want to save row indices
+df2.to_csv(out_path/'t1_filtered.csv')  # Set index=False if you don't want to save row indices
 
 
-# In[113]:
+# In[ ]:
 
 
-df2.iloc[0:9,]
+df2
 
 
 # In[ ]:
@@ -845,18 +801,10 @@ df2.iloc[0:9,]
 
 
 
-# In[88]:
+# In[ ]:
 
 
-end = get_ipython().getoutput(" echo 'ubs_basic.ipnby | ubs_basic.py ENDED  :' `date`")
-end = end[0]
 
-
-# In[89]:
-
-
-print(start)
-print(end)
 
 
 # In[ ]:
