@@ -43,14 +43,7 @@
 
 # #### Environment
 
-# In[84]:
-
-
-start = get_ipython().getoutput(" echo 'ubs_basic.ipnby | ubs_basic.py STARTED:' `date`;")
-start = start[0]; start
-
-
-# In[2]:
+# In[1]:
 
 
 import os, sys, subprocess
@@ -62,7 +55,7 @@ from IPython.display import display, HTML
 from snakemake import load_configfile
 
 
-# In[3]:
+# In[2]:
 
 
 def fname(path, base, sufix):
@@ -70,10 +63,28 @@ def fname(path, base, sufix):
     return Path(path)/f"{base}.{sufix}"
 
 def mkpath(path):
-    'Return dir path name; creates (not over-writting) a new dir within the pwd'
+    'Return dir path name; creates (not over-writting) a new dir within the pwd. Also prints date/time executed'
     path = Path(path)
     if not os.path.exists(path): os.makedirs(path)
     return path
+
+out_path = "" # Initial Value of out_path
+
+def out_time(path = None, message=""):
+    global out_path
+    'Print out date and out_path. Useful when running notebook from script'
+    message = "Started" if message == "" else message
+    path = out_path if path == None else ""
+    date = get_ipython().getoutput(' date')
+    result =  f">>> {message} {path}: {date[0]}"
+    return(result)
+
+
+# In[3]:
+
+
+start_time = out_time(message="Session Started")
+print(start_time)
 
 
 # #### Path References
@@ -207,6 +218,7 @@ def make_histogram(ds, ds_name, table_label=None, y_label="Frequency", density=T
 
 
 out_path = mkpath('samples')
+print(out_time())
 
 
 # #### Project definitions for treated samples, control samples
@@ -277,6 +289,7 @@ for f in files:
 
 in_path = mkpath("samples")
 out_path = mkpath("fastqc_pre")
+out_time()
 
 
 # #### fastqc
@@ -312,6 +325,7 @@ get_ipython().system(' ls {out_path}')
 
 in_path = mkpath("samples")
 out_path = mkpath("trim")
+out_time()
 
 
 # In[29]:
@@ -523,6 +537,7 @@ make_histogram(ds, "Read Length", "Trimmed Reads")
 
 in_path = mkpath("trim")
 out_path = mkpath("fastqc_post")
+out_time()
 
 
 # In[48]:
@@ -555,6 +570,7 @@ get_ipython().system(' ls {out_path}')
 
 in_path = mkpath("trim")
 out_path = mkpath("hisat3n_align")
+out_time()
 
 
 # #### hisat-3n
@@ -694,6 +710,7 @@ get_ipython().system(' ls -lh {out_path}')
 
 in_path = mkpath("hisat3n_sort")
 out_path = mkpath("hisat3n_dedup")
+out_time()
 
 
 # #### umicollapse
@@ -713,7 +730,7 @@ out_path = mkpath("hisat3n_dedup")
 
 
 for sample in samples:
-    get_ipython().system("umicollapse bam       -i {fname(in_path,sample,'bam')}      -o {fname(out_path,sample,'bam')}     >  {fname(out_path,sample,'log')}")
+    get_ipython().system("umicollapse bam       --two-pass      -i {fname(in_path,sample,'bam')}      -o {fname(out_path,sample,'bam')}     >  {fname(out_path,sample,'log')}")
 
 
 # #### Analysis
@@ -727,18 +744,19 @@ get_ipython().system(' ls -lh {out_path}')
 # In[64]:
 
 
-get_ipython().system(' cat {out_path}/t1.log')
+get_ipython().system(' cat {out_path}/t2.log')
 
 
 # ## Step: Hisat3n_call
 
 # #### Call Converted bases
 
-# In[74]:
+# In[65]:
 
 
 in_path = mkpath("hisat3n_dedup")
 out_path = mkpath("hisat3n_call")
+out_time()
 
 
 # #### hisat-3n-table
@@ -766,7 +784,7 @@ for sample in samples:
 
 # #### Analysis
 
-# In[75]:
+# In[67]:
 
 
 get_ipython().system(' ls -lh {out_path}')
@@ -788,75 +806,30 @@ get_ipython().system(' ls -lh {out_path}')
 get_ipython().system(' zcat {out_path}/t1.tsv.gz |head -20')
 
 
-# In[101]:
+# In[82]:
 
 
-df = pd.read_csv(out_path/'t1.tsv.gz', sep='\t', compression='gzip', low_memory=False, dtype={4: int, 6: int })
+for sample in samples:
+    df = pd.read_csv(fname(out_path, sample,'tsv.gz'), sep='\t', compression='gzip', low_memory=False, dtype={4: int, 6: int })
+    df_f = df[df['unconvertedBaseCount'] > df['convertedBaseCount']]
+    df_f.to_csv(fname(out_path,sample,'called.csv'),index=False)  # Set index=False i
 
 
-# In[133]:
+# **How long did the Notebook Sesson Last or Script Run?**
+
+# In[77]:
 
 
-p1 = len(df[df.unconvertedBaseCount == 1])/len(df);
-p1
+start_time = out_time(message="Session Started")
+print(start_time)
 
 
-# In[136]:
+# In[78]:
 
 
-p2 = len(df[df.unconvertedBaseCount == 2])/len(df);
-p2
-
-
-# In[137]:
-
-
-p3 = len(df[df.unconvertedBaseCount == 3])/len(df);
-p3
-
-
-# In[132]:
-
-
-p1*p1
-
-
-# In[111]:
-
-
-df2 = df[(df['unconvertedBaseCount'] > 1) &  (df['unconvertedBaseCount'] > df['convertedBaseCount'])]
-
-
-# In[118]:
-
-
-df2.to_csv(out_path/'t1_filtered.csv',index=False)  # Set index=False if you don't want to save row indices
-
-
-# In[113]:
-
-
-df2.iloc[0:9,]
-
-
-# In[ ]:
-
-
-
-
-
-# In[88]:
-
-
-end = get_ipython().getoutput(" echo 'ubs_basic.ipnby | ubs_basic.py ENDED  :' `date`")
-end = end[0]
-
-
-# In[89]:
-
-
-print(start)
-print(end)
+end_time = out_time("",message="Session Ended  ")
+print(start_time)
+print(end_time)
 
 
 # In[ ]:

@@ -6,4 +6,4 @@ rm -fr fastqc_post/ fastqc_pre/ hisat3n_align/ hisat3n_call/ hisat3n_dedup/ hisa
 
 stamp=`date "+%d-%m-%Y-%H:%M"`
 
-ipython ubs_basic.py tee $date.log
+ipython ubs_basic.py | tee $stamp.log
