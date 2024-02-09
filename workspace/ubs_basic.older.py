@@ -289,7 +289,7 @@ for f in files:
 
 in_path = mkpath("samples")
 out_path = mkpath("fastqc_pre")
-out_time()
+print(out_time())
 
 
 # #### fastqc
@@ -325,7 +325,7 @@ get_ipython().system(' ls {out_path}')
 
 in_path = mkpath("samples")
 out_path = mkpath("trim")
-out_time()
+print(out_time())
 
 
 # In[29]:
@@ -537,7 +537,7 @@ make_histogram(ds, "Read Length", "Trimmed Reads")
 
 in_path = mkpath("trim")
 out_path = mkpath("fastqc_post")
-out_time()
+print(out_time())
 
 
 # In[48]:
@@ -570,7 +570,7 @@ get_ipython().system(' ls {out_path}')
 
 in_path = mkpath("trim")
 out_path = mkpath("hisat3n_align")
-out_time()
+print(out_time())
 
 
 # #### hisat-3n
@@ -654,6 +654,7 @@ get_ipython().system(" grep -v '@' {out_path}/t1.sam |head -1")
 
 in_path = mkpath("hisat3n_align")
 out_path = mkpath("hisat3n_sort")
+print(out_time())
 
 
 # #### samtools
@@ -710,7 +711,7 @@ get_ipython().system(' ls -lh {out_path}')
 
 in_path = mkpath("hisat3n_sort")
 out_path = mkpath("hisat3n_dedup")
-out_time()
+print(out_time())
 
 
 # #### umicollapse
@@ -756,7 +757,7 @@ get_ipython().system(' cat {out_path}/t2.log')
 
 in_path = mkpath("hisat3n_dedup")
 out_path = mkpath("hisat3n_call")
-out_time()
+print(out_time())
 
 
 # #### hisat-3n-table
