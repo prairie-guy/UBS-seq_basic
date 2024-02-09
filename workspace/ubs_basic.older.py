@@ -43,7 +43,7 @@
 
 # #### Environment
 
-# In[1]:
+# In[ ]:
 
 
 import os, sys, subprocess
@@ -55,7 +55,7 @@ from IPython.display import display, HTML
 from snakemake import load_configfile
 
 
-# In[2]:
+# In[ ]:
 
 
 def fname(path, base, sufix):
@@ -80,7 +80,7 @@ def out_time(path = None, message=""):
     return(result)
 
 
-# In[3]:
+# In[ ]:
 
 
 start_time = out_time(message="Session Started")
@@ -93,7 +93,7 @@ print(start_time)
 # 
 # `Note:` Github ignores the data/, workspace/ and reference directories, except for `.py` and `.ipynb` files
 
-# In[4]:
+# In[ ]:
 
 
 home_path      = Path.cwd()/'..'
@@ -103,27 +103,27 @@ workspace_path = home_path/'workspace'
 
 # Use `config.yaml` to configure `references/`, but not samples in `data/`
 
-# In[5]:
+# In[ ]:
 
 
 config = load_configfile("../config.yaml")
 
 
-# In[6]:
+# In[ ]:
 
 
 genome_fa  = home_path/config['reference']['genome']['fa'].removeprefix('~/')
 genome_idx = home_path/config['reference']['genome']['hisat3n'].removeprefix('~/')
 
 
-# In[7]:
+# In[ ]:
 
 
 #genome_fa = ref_path/'genome/Homo_sapiens.GRCh38.genome.fa'
 #genome_idx = ref_path/'index/hist3n/Homo_sapiens.GRCh38.genome'
 
 
-# In[8]:
+# In[ ]:
 
 
 # Add to shell PATH
@@ -132,14 +132,14 @@ os.environ['PATH'] = '/home/cdaniels/bin/homer:' + os.environ['PATH'] # homer
 os.environ['PATH'] = '/home/cdaniels/bin/hisat-3n:' + os.environ['PATH'] # hisat-3n
 
 
-# In[9]:
+# In[ ]:
 
 
 # Set Java Flag
 os.environ['_JAVA_OPTIONS'] = '-Xmx8g'
 
 
-# In[10]:
+# In[ ]:
 
 
 # Number of cores                                                                                                                                                                                               
@@ -150,7 +150,7 @@ nc
 
 # #### Functions
 
-# In[11]:
+# In[ ]:
 
 
 def nlines(file):
@@ -160,7 +160,7 @@ def nlines(file):
     return n
 
 
-# In[12]:
+# In[ ]:
 
 
 def nseqs(bam_fastq):
@@ -169,7 +169,7 @@ def nseqs(bam_fastq):
     return int(n[0])
 
 
-# In[13]:
+# In[ ]:
 
 
 def samples_string(samples,path,suffix='bam'):
@@ -177,7 +177,7 @@ def samples_string(samples,path,suffix='bam'):
     return " ".join([str(fname(path,sample,suffix)) for sample in samples])    
 
 
-# In[14]:
+# In[ ]:
 
 
 def make_table(ds1, ds2, ds1_name, ds2_name, y_label=None, xs_labels=None, table_label=None):
@@ -196,7 +196,7 @@ def make_table(ds1, ds2, ds1_name, ds2_name, y_label=None, xs_labels=None, table
     plt.show()
 
 
-# In[15]:
+# In[ ]:
 
 
 def make_histogram(ds, ds_name, table_label=None, y_label="Frequency", density=True):
@@ -214,7 +214,7 @@ def make_histogram(ds, ds_name, table_label=None, y_label="Frequency", density=T
 
 # #### Select Samples and Filenames
 
-# In[16]:
+# In[ ]:
 
 
 out_path = mkpath('samples')
@@ -223,7 +223,7 @@ print(out_time())
 
 # #### Project definitions for treated samples, control samples
 
-# In[17]:
+# In[ ]:
 
 
 # short sample names
@@ -232,20 +232,20 @@ control = [] # Edit
 samples = treated + control
 
 
-# In[18]:
+# In[ ]:
 
 
 samples
 
 
-# In[19]:
+# In[ ]:
 
 
 # sample filenames
 samples_fn = [data_path/'test0_R1.fq.gz', data_path/'test1_R1.fq.gz', data_path/'test2_R1.fq.gz']
 
 
-# In[20]:
+# In[ ]:
 
 
 # dict
@@ -253,7 +253,7 @@ s2fn = {name: fname for (name,fname) in zip(samples,samples_fn)};
 s2fn
 
 
-# In[21]:
+# In[ ]:
 
 
 for (s,fn) in s2fn.items():
@@ -262,7 +262,7 @@ for (s,fn) in s2fn.items():
 
 # Check that the files look correct
 
-# In[22]:
+# In[ ]:
 
 
 get_ipython().system('ls -lLh {out_path}')
@@ -270,7 +270,7 @@ get_ipython().system('ls -lLh {out_path}')
 
 # How many sequence reads do we have per Sample
 
-# In[23]:
+# In[ ]:
 
 
 # Total Reads per Samples
@@ -284,7 +284,7 @@ for f in files:
 
 # #### Pre Trimming Quality Control
 
-# In[24]:
+# In[ ]:
 
 
 in_path = mkpath("samples")
@@ -294,7 +294,7 @@ print(out_time())
 
 # #### fastqc
 
-# In[25]:
+# In[ ]:
 
 
 get_ipython().system(' fastqc --help')
@@ -303,14 +303,14 @@ get_ipython().system(' fastqc --help')
 # ##### paramaters:
 # - -o output dir
 
-# In[26]:
+# In[ ]:
 
 
 for sample in samples:
     get_ipython().system(' fastqc {fname(in_path,sample,"fq.gz")} -o {out_path} 2> /dev/null')
 
 
-# In[27]:
+# In[ ]:
 
 
 get_ipython().system(' ls {out_path}')
@@ -320,7 +320,7 @@ get_ipython().system(' ls {out_path}')
 
 # #### Trim the adapter and downstream sequence as well as trimmng lower quality downstream sequence
 
-# In[28]:
+# In[ ]:
 
 
 in_path = mkpath("samples")
@@ -328,7 +328,7 @@ out_path = mkpath("trim")
 print(out_time())
 
 
-# In[29]:
+# In[ ]:
 
 
 adapter =  "AGATCGGAAGAGCACACGTCT"
@@ -337,7 +337,7 @@ barcode3 = "ATCACG"
 #barcode3 = "TATCACGATCACG"
 
 
-# In[30]:
+# In[ ]:
 
 
 get_ipython().system('ls {in_path}')
@@ -345,7 +345,7 @@ get_ipython().system('ls {in_path}')
 
 # #### cutadapt
 
-# In[31]:
+# In[ ]:
 
 
 get_ipython().system(' cutadapt --help')
@@ -387,152 +387,20 @@ get_ipython().system(' cutadapt --help')
 
 # **NOTE:** Added `--length 30` to cutoff reads where C begin to become more common. Not in original code
 
-# In[32]:
+# In[ ]:
 
 
 for sample in samples:
     get_ipython().system('cutadapt -j 0 --nextseq-trim=15 --action=trim -a \'{barcode3}{adapter};e=0.15;o=6;anywhere;\'             -n 2 -u 5 -u -5 --max-n=0 -q 15 -m 20 -l 80             --length 30              --rename=\'{{id}}_{{cut_prefix}}{{cut_suffix}} {{comment}}\'             --too-short-output={fname(out_path,sample,"fastq_tooshort")}              -o {fname(out_path,sample,"fq.gz")}               {fname(in_path,sample,"fq.gz")} > {fname(out_path,sample,"log")}')
 
 
-# #### Analysis
-
-# Take a look at a FASTQ file
-
-# In[33]:
-
-
-in_fn  = fname(in_path,treated[0],'fq.gz')
-out_fn = fname(out_path,treated[0],'fq.gz')
-in_fn
-
-
-# In[34]:
-
-
-get_ipython().system(' zcat {in_fn}|head -16')
-
-
-# In[35]:
-
-
-def show_adapter(reads):
-    for read in reads.split('\n'):
-        read = read.replace(adapter, f'<span style="color: blue;">{barcode3}{adapter}</span>')
-        display(HTML(read))
-
-
-# Look for adapter in untrimmed reads
-
-# In[36]:
-
-
-reads = get_ipython().getoutput(" zcat {in_fn} | head -36  | seqtk seq -A |grep -v '>'")
-reads = ('\n').join(reads)
-show_adapter(reads)
-
-
-# Verify that adapters and all downstream elements of reads have been trimmed
-
-# In[37]:
-
-
-reads = get_ipython().getoutput("zcat {out_fn}| head -256  | seqtk seq -A |grep -v '>'")
-reads = ('\n').join(reads)
-show_adapter(reads)
-
-
-# What did `--rename='{{id}}_{{cut_prefix}}{{cut_suffix}} {{comment}}'` do?
-# 
-# Looks like 
-
-# In[38]:
-
-
-get_ipython().system('zcat {in_fn}| head -2')
-
-
-# In[39]:
-
-
-get_ipython().system('zcat {out_fn}| head -2')
-
-
-# Verify that adapters and all downstream elements of reads have been trimmed
-
-# No reads should have been deleted with cutadapt. Veryify that number of reads before and after cutadapt are the same.
-
-# In[40]:
-
-
-# Untrimmed
-files = [fname(in_path,sample, "fq.gz") for sample in samples]
-ins = [nseqs(f) for f in files]
-ins
-
-
-# In[41]:
-
-
-# Adapter Trimmed Reads
-files = [fname(out_path,sample, "fq.gz") for sample in samples]
-ins = [nseqs(f) for f in files]
-ins
-
-
-# In[42]:
-
-
-# Too Short Reads
-files = [fname(out_path,sample, "fastq_tooshort") for sample in samples]
-ins = [nseqs(f) for f in files]
-ins
-
-
-# Compare the sum of read lengths in the original and adapter trimmed files
-
-# In[43]:
-
-
-files = [fname(in_path,sample, "fq.gz") for sample in samples]
-res = []
-for f in files:
-    n = get_ipython().getoutput("seqtk seq -A {f}|grep -v '>'|wc -c")
-    res.append(int(n[0]))
-ins = res
-ins
-
-
-# In[44]:
-
-
-files = [fname(out_path,sample, "fq.gz") for sample in samples]
-res = []
-for f in files:
-    n = get_ipython().getoutput("seqtk seq -A {f}|grep -v '>'|wc -c")
-    res.append(int(n[0]))
-outs = res
-outs
-
-
-# In[45]:
-
-
-make_table(ins, outs, "Origs", "Trimmed", "Sum of Total Read Lengths", samples, "Sum of Total Reads Per Sample")
-
-
-# In[46]:
-
-
-reads = get_ipython().getoutput('xargs zcat {out_path}/*.gz | seqtk seq -A  |grep -v ">"')
-ds = [len(read) for read in reads]
-make_histogram(ds, "Read Length", "Trimmed Reads")
 
 
 # ## Step: fastqc_post
 
 # #### Post Trimming Quality Control
 
-# In[47]:
+# In[ ]:
 
 
 in_path = mkpath("trim")
@@ -540,7 +408,7 @@ out_path = mkpath("fastqc_post")
 print(out_time())
 
 
-# In[48]:
+# In[ ]:
 
 
 for sample in samples:
@@ -549,13 +417,13 @@ for sample in samples:
 
 # #### Consolidate fastqc Reports
 
-# In[49]:
+# In[ ]:
 
 
 get_ipython().system('multiqc -f -fp -m fastqc -n multiqc -o {out_path} {out_path}')
 
 
-# In[50]:
+# In[ ]:
 
 
 get_ipython().system(' ls {out_path}')
@@ -565,7 +433,7 @@ get_ipython().system(' ls {out_path}')
 
 # #### Align Samples to Genome with Hisat-3n
 
-# In[51]:
+# In[ ]:
 
 
 in_path = mkpath("trim")
@@ -577,7 +445,7 @@ print(out_time())
 
 # http://daehwankimlab.github.io/hisat2/hisat-3n/
 
-# In[52]:
+# In[ ]:
 
 
 get_ipython().system(' hisat-3n --help')
@@ -612,7 +480,7 @@ get_ipython().system(' hisat-3n --help')
 # - --un {output.fq}, write unpaired reads that didn't align to <path> 
 # - -S {output.sam}, File for SAM output (default: stdout)
 
-# In[53]:
+# In[ ]:
 
 
 for sample in samples:
@@ -621,25 +489,25 @@ for sample in samples:
 
 # #### Analysis
 
-# In[54]:
+# In[ ]:
 
 
 get_ipython().system('ls -lh {out_path}')
 
 
-# In[55]:
+# In[ ]:
 
 
 get_ipython().system(' cat {out_path}/t1.summary')
 
 
-# In[56]:
+# In[ ]:
 
 
 get_ipython().system(' head -8 {out_path}/t1.unmapped.fq')
 
 
-# In[57]:
+# In[ ]:
 
 
 get_ipython().system(" grep -v '@' {out_path}/t1.sam |head -1")
@@ -649,7 +517,7 @@ get_ipython().system(" grep -v '@' {out_path}/t1.sam |head -1")
 
 # #### Sort and Index Hisat3n Sam Files
 
-# In[58]:
+# In[ ]:
 
 
 in_path = mkpath("hisat3n_align")
@@ -687,7 +555,7 @@ print(out_time())
 #     -o {output} -
 # ```
 
-# In[59]:
+# In[ ]:
 
 
 for sample in samples:
@@ -696,7 +564,7 @@ for sample in samples:
 
 # #### Analysis
 
-# In[60]:
+# In[ ]:
 
 
 get_ipython().system(' ls -lh {out_path}')
@@ -706,7 +574,7 @@ get_ipython().system(' ls -lh {out_path}')
 
 # #### Remove Dulpicate Reads
 
-# In[61]:
+# In[ ]:
 
 
 in_path = mkpath("hisat3n_sort")
@@ -727,7 +595,7 @@ print(out_time())
 #       > {output.log}
 # ```
 
-# In[62]:
+# In[ ]:
 
 
 for sample in samples:
@@ -736,13 +604,13 @@ for sample in samples:
 
 # #### Analysis
 
-# In[63]:
+# In[ ]:
 
 
 get_ipython().system(' ls -lh {out_path}')
 
 
-# In[64]:
+# In[ ]:
 
 
 get_ipython().system(' cat {out_path}/t2.log')
@@ -752,7 +620,7 @@ get_ipython().system(' cat {out_path}/t2.log')
 
 # #### Call Converted bases
 
-# In[65]:
+# In[ ]:
 
 
 in_path = mkpath("hisat3n_dedup")
@@ -776,7 +644,7 @@ print(out_time())
 #     bgzip -@ {threads} -c > {output}
 # ```
 
-# In[66]:
+# In[ ]:
 
 
 for sample in samples:
@@ -785,7 +653,7 @@ for sample in samples:
 
 # #### Analysis
 
-# In[67]:
+# In[ ]:
 
 
 get_ipython().system(' ls -lh {out_path}')
@@ -801,13 +669,13 @@ get_ipython().system(' ls -lh {out_path}')
 # 6. `unconvertedBaseQualities:` the qualities for unconverted base in read-level measurement. Length of this string is equal to the number of unconverted Base in read-level measurement.
 # 7. `unconvertedBaseCount:` number of distinct read positions where unconverted base in read-level measurements were found. this number should equal to the length of unconvertedBaseQualities.
 
-# In[68]:
+# In[ ]:
 
 
 get_ipython().system(' zcat {out_path}/t1.tsv.gz |head -20')
 
 
-# In[82]:
+# In[ ]:
 
 
 for sample in samples:
@@ -818,23 +686,18 @@ for sample in samples:
 
 # **How long did the Notebook Sesson Last or Script Run?**
 
-# In[77]:
+# In[ ]:
 
 
-start_time = out_time(message="Session Started")
-print(start_time)
-
-
-# In[78]:
-
-
-end_time = out_time("",message="Session Ended  ")
-print(start_time)
+end_time = out_time(message="Session Ended")
 print(end_time)
 
 
 # In[ ]:
 
 
+print(start_time)
+print(end_time)
 
 
+# In[ ]:
