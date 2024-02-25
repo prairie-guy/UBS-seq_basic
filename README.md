@@ -58,7 +58,7 @@ workspace/*
 8. The function **fname(path,sample,suffix)** returns a file name without actually creating the file
 
 
-## UBS-seq_basic
+# UBS-seq_basic
 
 The purpose of this project is run a minimally viable UBS-seq pipline. For simplicity, it will run several single-end samples, mapping only to the genome. The core steps of the pipeline are:
 - cut_apapter
