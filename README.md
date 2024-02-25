@@ -13,6 +13,8 @@ Basic assumptions are made about the form of the file structure so that only not
 │   └── README_data.md
 ├── environment.yaml
 ├── README.md
+|── reference
+|   └── README_reference.md
 ├── scripts
 │   ├── clean.sh
 │   ├── downsample.sh
