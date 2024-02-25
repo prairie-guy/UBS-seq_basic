@@ -1,14 +1,56 @@
 # Basic Jupyter Pipeline Template
 
-This is an example of a Jupyter notebook template meant to be edited to create new  bioinformatics pipelines. The idea is to make it easy to interactively develop a pipeline, explore the results from each step and then either making adjustments to the input or else moving to the next step. Moreover, the use of graphs and tables at each step can be utilized to better understand both the tools and the data before moving to the next step. Once the pipeline is working as expected, it can be converted to a python script and edited to remove non-essential elements.
+This is an example of a Jupyter notebook template meant to be edited to create new bioinformatics pipelines. The idea is to make it easy to interactively develop a pipeline, explore the results from each step and then either making adjustments to the input or else moving to the next step. Moreover, the use of graphs and tables at each step can be utilized to better understand both the tools and the data before moving to the next step. Once the pipeline is working as expected, it can be converted to a python script and edited to remove non-essential elements.
 
-#### The logic for a pipeline is defined through a series of Steps using dirs to save intermediate results. A general workflow might be as follows:
+Basic assumptions are made about the form of the file structure so that only notebooks, scripts and other elements of the pipeline are saved to github. The large genomic reference files and intermediate workspace directories are ignored by github. If necessary, these files can be saved locally. 
+
+### Github File Structure
+
+```
+.
+├── config.yaml
+├── data
+│   └── README_data.md
+├── environment.yaml
+├── README.md
+├── scripts
+│   ├── clean.sh
+│   ├── downsample.sh
+│   ├── generate_reference.sh
+│   ├── nb2py.sh
+│   ├── README_scripts.md
+│   └── run_ubs_seq.sh
+├── src
+│   └── README_IGV_WEB.md
+└── workspace
+    ├── README_workspace.md
+    ├── ubs_basic.ipynb
+    └── ubs_basic.py
+```
+
+
+### .gitignore file
+
+```
+reference/
+!reference/README_reference.md
+data/*
+!data/README_data.md
+!data/*.py
+!data/*.ipynb
+workspace/*
+!workspace/README_workspace.md
+!workspace/*.py
+!workspace/*.ipynb
+.*~
+.snakemake/
+```
+
+### The logic for a pipeline is defined through a series of Steps using dirs to save intermediate results. A general workflow might be as follows:
 
 1. Fork this repository from Github and edit as appropriate. This is a sample for a minimally viable pipeline for UBS-seq. (Described more fully below.)
 2. The required directories are:
-  - `workspace` is the major directory where the main `.ipynb` and `.py` files are expected to be located. Additionally, the dirs used in the pipeline should be saved here. In order to use github Because of their potentially large sizes, non of the contents of these dirs are saved to github. (See `.gitignore` below.) 
-
-
+  - `workspace/` is the workingdirectory where primary `.ipynb` and `.py` files are located. Additionally, the intermediate dirs used in for steps withing the pipeline should be saved here.
 1. For each **Step** in the pipeline, a new dir will be created and labeled **Step** and will contain all files created by that **Step**
 2. Within a **Step**, **in_path** and **out_path** will generically refer to the prior and current **Step**
 3. Within each **Step**, the appropriate processes will occur. Generally this involves processing files from **in_path** and saving to **out_path**
@@ -16,17 +58,7 @@ This is an example of a Jupyter notebook template meant to be edited to create n
 5. The function **mkpath(step)** returns a path for a dir **Step**. It will create a dir if need be, but not overwrite an existing dir
 66. The function **fname(path,sample,suffix)** returns a file name without actually creating the file
 
-### Directories and Files added to .gitignore
 
-- reference/
-- data/*
-- !data/*.py
-- !data/*.ipynb
-- workspace/*
-- !workspace/*.py
-- !workspace/*.ipynb
-- .*~
-- .snakemake/
 
 ## UBS-seq_basic
 
