@@ -1,8 +1,11 @@
 reference/
+!reference/README_reference.md
 data/*
+!data/README_data.md
 !data/*.py
 !data/*.ipynb
 workspace/*
+!workspace/README_workspace.md
 !workspace/*.py
 !workspace/*.ipynb
 .*~
