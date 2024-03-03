@@ -1,17 +1,42 @@
-reference:
-  contamination:
-    fa: ~/reference/genome/contamination/contamination.fa
-    hisat3n: ~/reference/index/hisat3n/contamination/contamination
-  genes:
-    fa: ~/reference/genome/Homo_sapiens.GRCh38.sncRNA.fa
-    hisat3n: ~/reference/index/hisat3n/Homo_sapiens.GRCh38.sncRNA/Homo_sapiens.GRCh38.sncRNA
-  genome:
-    fa: ~/reference/genome/Homo_sapiens.GRCh38.genome.fa
-    hisat3n: ~/reference/index/hisat3n/Homo_sapiens.GRCh38.genome/Homo_sapiens.GRCh38.genome
+### Sample config.yaml from Chang
+# path:
+#   # STAR version 2.7.7a
+#   star: ~/tools/STAR/bin/Linux_x86_64/STAR
+#   falco: ~/tools/falco-0.2.4/falco
+#   featureCounts: ~/tools/subread-2.0.1-Linux-x86_64/bin/featureCounts
+#   bamtools: ~/.local/bin/bamtools
+#   samtools: ~/tools/samtools/samtools
+#   bowtie2: ~/.local/bin/bowtie2
+#   hisat2: ~/tools/hisat2/hisat2
+#   hisat3n: ~/tools/hisat2/hisat-3n
+#   hisat3ntable: ~/tools/hisat2/hisat-3n-table
+#   umicollapse: ~/tools/UMICollapse/umicollapse.jar
+#   rnaseqc: ~/.local/bin/rnaseqc
+#   gatk: ~/tools/jdk8u322-b06-jre/bin/java -Xmx36G -jar ~/tools/gatk-4.2.5.0/gatk-package-4.2.5.0-local.jar
+#
+# # adapter info
+# adapter:
+#   barcode3: ATCACG
+#   barcode5: CGTGAT
+
+#   # adapters for single-end library
+#   adapter5: GTTCAGAGTTCTACAGTCCGACGATC
+#   adapter3: AGATCGGAAGAGCACACGTCT
+#   adapter5Nextera: AGATGTGTATAAGAGACAG
+
+#   # adapters for pair-end library (ligation based)
+#   # R1 read the Truseq p5
+#   truseq_r1: AGATCGGAAGAGCACACGTCTGAACTCCAGTCAC
+#   # R2 read the Truseq p7
+#   truseq_r2: AGATCGGAAGAGCGTCGTGTAGGGAAAGAGTGT
+#   # R1 read the smallRNA p5
+#   smallRNA_r1: TGGAATTCTCGGGTGCCAAGGAACTCCAGTCAC
+#   # R2 read the smallRNA p7
+#   smallRNA_r2: GATCGTCGGACTGTAGAACTCT
 
 # Sample name should be indentical and listed in the 2nd level of the yaml file
 # Each sample will be analysis seperately, but
-# samples sharing the same group id will be regared as biological replicates and combined in the comparing step 
+# samples sharing the same group id will be regared as biological replicates and combined in the comparing step
 # samples:
 #   CONTROL-rep1:
 #     data:
@@ -29,21 +54,39 @@ reference:
 #         R2: ../data/test3_R2.fq.gz
 #     group: DRUG
 
+
+reference:
+  contamination:
+    fa: ~/reference/genome/contamination/contamination.fa
+    hisat3n: ~/reference/index/hisat3n/contamination/contamination
+  genes:
+    fa: ~/reference/genome/Homo_sapiens.GRCh38.sncRNA.fa
+    hisat3n: ~/reference/index/hisat3n/Homo_sapiens.GRCh38.sncRNA/Homo_sapiens.GRCh38.sncRNA
+  genome:
+    fa: ~/reference/genome/Homo_sapiens.GRCh38.genome.fa
+    hisat3n: ~/reference/index/hisat3n/Homo_sapiens.GRCh38.genome/Homo_sapiens.GRCh38.genome
+
 samples:
-  CONTROL-rep1:
+  t1:
     data:
-      - R1: ../data/test0_R1.fq.gz
-    group: CONTROL
-  DRUG-rep1:
+      - R1: ~/data/test1_R1.fq.gz
+    group: treated
+    srr: SRR23538290
+    description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 3"
+  t2:
     data:
-      - R1: ../data/test1_R1.fq.gz
-    group: DRUG
-  DRUG-rep2:
+      - R1: ~/data/test2_R1.fq.gz
+    group: treated
+    srr: SRR23538291
+    description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 2"
+  c1:
     data:
-      - R1: ../data/test2_R1.fq.gz
-    group: DRUG
+      - R1: ~/data/test3_R1.fq.gz
+    group: control
+    srr: SRR23538292
+    description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 1"
 
 
 data_dir: ../data
-ref_dir: ../ref
+ref_dir: ../reference
 src_dir: ../src

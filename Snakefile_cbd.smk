@@ -13,20 +13,20 @@ workdir: "workspace"
 # change this one to your own
 SPECIES = "GRCh38"
 
-
-CUSTOMIZED_GENES = []
-LIBRARY_STRATEGY = "INLINE"
-STRANDNESS = "F"
+<<CBD: How are each of these used? >>
+CUSTOMIZED_GENES = [] <<CBD: Are these genes to be used in experiment; Need reference fasta? >>
+LIBRARY_STRATEGY = "INLINE" <<CBD: What is INLINE? Other strategies: TAKARAV3, SWIFT, STRANDED. Why and how are each used? >>
+STRANDNESS = "F" <<CBD: This is the default. Where is this relevent? Cutadapt, alignment? >>
 REF = config["reference"]
-REFTYPES = ["genes", "genome", "contamination"]
-REFTYPES_CALL = ["genes", "genome"]
+REFTYPES = ["genes", "genome", "contamination"] <<CBD: Is this used for reference fasta? What is the strategy here? I did not see any filtering of rRNA, tRNA or contamination? Are these run for each sample? >>
+REFTYPES_CALL = ["genes", "genome"] <<CBD: Is genes for mRNA and genome for DNA? How are these set in config.yaml? >>
 
 
 read_ids = ["R1", "R2"]
-pairend_run_ids = []
+pairend_run_ids = [] <<CBD: What are these used for? >>
 sample2data = defaultdict(dict)
 group2sample = defaultdict(list)
-for s, v in config["samples"].items():
+for s, v in config["samples"].items(): <<CBD: Are groups considered to be replicates? Are runs elements of a group? >>
     # picked treated samples only
     # if "treated" in s:
     if v.get("treated", True):
@@ -228,7 +228,7 @@ rule report_cutadapt_SE:
 # The libraries of TAKARA v3 KIT is too long, so there is too much unjoined reads.
 # run in PE mode to save the reads
 
-
+<<CBD: How far through the pipeline must paired ends be condidered seperately> qc, cutadapt, hisat-3n_mapping, sorting, joining >>
 rule cutadapt_PE:
     input:
         "merged_reads/{sample}_{rn}.un1.fq.gz",
@@ -433,6 +433,7 @@ rule report_falco_after:
 # If study virus, then also premap to virus genome
 
 
+<<CBD: Prepared for customized. For default which version of index used? --repeat-index required 256 Gb RAM. What does this do? Can I use yours. Does any version of GRCh38 work? Using v.110 from Ensemble. >>
 rule prepare_genes_index:
     input:
         CUSTOMIZED_GENES,
@@ -482,7 +483,10 @@ rule hisat2_3n_mapping_genes:
         {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} --new-summary -q -U {input[0]} {params.mapping} --all --norc --base-change C,T --mp 8,2 --no-spliced-alignment --un {output.fq} -S {output.sam}
         """
 
-
+<<CBD: What is directional mapping? --directional-mapping (F) vs. --directional-mapping-reverse (R) vs. nothing>>
+<<CBD: What does --norc (No reverse complement) >>
+<<CBD: How to use --no-spliced-alignment >>
+<<CBd: How to use --pen-noncansplice 20 >>
 rule hisat2_3n_mapping_genome:
     input:
         "run_mapping_SE/{sample}_{rn}.genes.fq",
@@ -657,7 +661,7 @@ rule hisat2_3n_sort_PE:
         {params.samtools} view -@ {threads} -F4 -b {input} | {params.samtools} sort -@ {threads} --write-index -m 4G -O BAM -o {output} -
         """
 
-
+<<CBD: In joining SE and PE mappings, is it typical to have SE joined with PE? What is being merged? It looks like runs (same as replicates) are kept seperate >>
 rule join_SE_and_PE_mapping:
     input:
         "run_mapping_SE/{sample}_{rn}.{ref}.bam",
@@ -678,7 +682,8 @@ rule join_SE_and_PE_mapping:
 # combine mapping results (multi run)
 
 
-<<CBD: Does this combine each of groups together. For example, all of treated and all of control
+<<CBD: In combining runs, is this the same as merging all groups together. For example, all of treated and all of control. For example, does t1,t2 -> t and c1 -> c >>
+<<CBD: In combining runs, do we lose the ability for to look at replicates against one another>>
        What does "combined_mapping/{sample}.{ref}.bam" do? Does {t_1, t_2} -> t and {c1} -> c >>
 rule combine_runs:
     input:
@@ -704,7 +709,8 @@ rule combine_runs:
 
 ## stat reads
 
-
+<<CBD: Need parse_cutadapt_report.py>>
+<<CBD: What is being done here? What is the output>>
 rule count_cutadapt_reads:
     input:
         lambda wildcards: [
@@ -729,7 +735,8 @@ rule count_cutadapt_reads:
 
 ## stat mapping
 
-
+<<CBD: stat_mapping looks to be creating a tsv file for REFTYPES = ["genes", "genome", "contamination"]. Finds number  of high quality reads>>
+<<CBD: Why not filter out these reads? >>
 rule stat_mapping_number:
     input:
         bam=lambda wildcards: [
@@ -754,7 +761,7 @@ rule stat_mapping_number:
 
 ## remove duplicates
 
-<<CBD: Does dedupe only work on combined groups. Are single samples not deduped?>>
+<<CBD: Does dedup only work on combined groups. Are single samples not deduped?>>
 rule hisat2_3n_dedup:
     input:
         bam="combined_mapping/{sample}.{ref}.bam",
@@ -803,7 +810,7 @@ rule dedup_index:
 
 ## call mutation
 
-
+<<CBD: Call mutations for unique reads from deduped combined reads.  What is importance of unique vs. multi aligned >>
 rule hisat2_3n_calling_unfiltered_unique:
     input:
         "dedup_mapping/{sample}.{ref}.bam",
@@ -825,8 +832,8 @@ rule hisat2_3n_calling_unfiltered_unique:
 
 
 # Update: previous version only call unique mapping reads
-
-
+<<CBD: Call mutations for multi reads from deduped combined reads>>
+<<CBD: Why filter -e "rlen<100000" >>
 rule hisat2_3n_calling_unfiltered_multi:
     input:
         "dedup_mapping/{sample}.{ref}.bam",
@@ -850,7 +857,9 @@ rule hisat2_3n_calling_unfiltered_multi:
 
 ## filter cluster effect and call mutation
 
-
+<<CBD: Filter (uncalled) combined deduped >>
+<<CBD: Why only < 4 mutations? >>
+<<CBD: Technically output is not really converted>>
 rule hisat2_3n_filtering:
     input:
         bam="dedup_mapping/{sample}.{ref}.bam",
@@ -868,7 +877,7 @@ rule hisat2_3n_filtering:
         {params.samtools} view -@ {threads} -e "[XM] * 20 <= (qlen-sclen) && [Zf] <= 3 && 3 * [Zf] <= [Zf] + [Yf]" {input.bam} -O BAM -o {output.converted}
         """
 
-
+<<CBD: Call unique previously filtered, combined >>
 rule hisat2_3n_calling_filtered_unqiue:
     input:
         "hisat_converted/{sample}.{ref}.bam",
@@ -890,6 +899,8 @@ rule hisat2_3n_calling_filtered_unqiue:
 
 
 # Update: previous version only call unique mapping reads
+<<CBD: Call multiple aligned,  previously filtered, combined >>
+<<CBD: How to get CG context. CGH etc >>
 rule hisat2_3n_calling_filtered_multi:
     input:
         "hisat_converted/{sample}.{ref}.bam",
@@ -912,7 +923,8 @@ rule hisat2_3n_calling_filtered_multi:
 
 ## calculate methy rate
 
-
+<<CBD: Is this being called on all called samples? >>
+<<CBD: Appears to be nuc/(nuc + nc)
 rule calculate_methylation_rate:
     input:
         expand(
@@ -938,7 +950,8 @@ rule calculate_methylation_rate:
 
 ## picked sites and merge table
 
-
+<<CBD: Need select_called_sites_v3.py >>
+<<CBD: What is logic? >>
 rule select_called_sites:
     input:
         # in paries
@@ -962,7 +975,8 @@ rule select_called_sites:
         {params.py} {output} {input}
         """
 
-
+<<CBD: Need combined_selected_sites.py >>
+<<CBD: What is logic? >>
 rule combined_select_sites:
     input:
         expand(
