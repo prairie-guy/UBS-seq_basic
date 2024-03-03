@@ -8,6 +8,7 @@ workspace/*
 !workspace/README_workspace.md
 !workspace/*.py
 !workspace/*.ipynb
+workspace_orig
 .*~
 .snakemake/
 src/hisat-3n/

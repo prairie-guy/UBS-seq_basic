@@ -8,5 +8,5 @@ fi
 
 cd $(dirname "$(readlink -f "$0")")
 cd ../data
-rm -f *.gz
-ls *.fastq | parallel "seqkit sample -p $prct {} | gzip > test{= s/SRR2353829(.*)\.fastq/\1/; =}_R1.fq.gz"
+rm *.gz 2>/dev/null
+ls *.fastq | sort | parallel "seqkit sample -p $prct {} | gzip > test{#}_R1.fq.gz"
