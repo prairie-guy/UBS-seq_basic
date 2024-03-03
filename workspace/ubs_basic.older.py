@@ -66,25 +66,9 @@ def mkpath(path):
     'Return dir path name; creates (not over-writting) a new dir within the pwd. Also prints date/time executed'
     path = Path(path)
     if not os.path.exists(path): os.makedirs(path)
+    date = get_ipython().getoutput(' date "+%H:%M:%S_%m-%d-%Y"')
+    print(f">>> {{{path}}} {date[0]}")
     return path
-
-out_path = "" # Initial Value of out_path
-
-def out_time(path = None, message=""):
-    global out_path
-    'Print out date and out_path. Useful when running notebook from script'
-    message = "Started" if message == "" else message
-    path = out_path if path == None else ""
-    date = get_ipython().getoutput(' date')
-    result =  f">>> {message} {path}: {date[0]}"
-    return(result)
-
-
-# In[ ]:
-
-
-start_time = out_time(message="Session Started")
-print(start_time)
 
 
 # #### Path References
@@ -218,7 +202,6 @@ def make_histogram(ds, ds_name, table_label=None, y_label="Frequency", density=T
 
 
 out_path = mkpath('samples')
-print(out_time())
 
 
 # #### Project definitions for treated samples, control samples
@@ -235,7 +218,7 @@ samples = treated + control
 # In[ ]:
 
 
-samples
+print(samples)
 
 
 # In[ ]:
@@ -274,10 +257,11 @@ get_ipython().system('ls -lLh {out_path}')
 
 
 # Total Reads per Samples
-files = [fname(out_path,sample, "fq.gz") for sample in samples]
-for f in files:
-    ns = nseqs(f)
-    print(f"{f}: {ns:,}")
+
+#files = [fname(out_path,sample, "fq.gz") for sample in samples]
+#for f in files:
+#    ns = nseqs(f)
+#    print(f"{f}: {ns:,}")
 
 
 # ## Step: fastqc_pre
@@ -289,7 +273,6 @@ for f in files:
 
 in_path = mkpath("samples")
 out_path = mkpath("fastqc_pre")
-print(out_time())
 
 
 # #### fastqc
@@ -297,7 +280,7 @@ print(out_time())
 # In[ ]:
 
 
-get_ipython().system(' fastqc --help')
+#! fastqc --help
 
 
 # ##### paramaters:
@@ -316,7 +299,7 @@ for sample in samples:
 get_ipython().system(' ls {out_path}')
 
 
-# ## Step: trimmed
+# ## Step: trim
 
 # #### Trim the adapter and downstream sequence as well as trimmng lower quality downstream sequence
 
@@ -325,7 +308,6 @@ get_ipython().system(' ls {out_path}')
 
 in_path = mkpath("samples")
 out_path = mkpath("trim")
-print(out_time())
 
 
 # In[ ]:
@@ -333,8 +315,6 @@ print(out_time())
 
 adapter =  "AGATCGGAAGAGCACACGTCT"
 barcode3 = "ATCACG"
-#adapter = "AGATCGGAAGAGCACACGTCTGAACTCCAG"
-#barcode3 = "TATCACGATCACG"
 
 
 # In[ ]:
@@ -348,7 +328,7 @@ get_ipython().system('ls {in_path}')
 # In[ ]:
 
 
-get_ipython().system(' cutadapt --help')
+#! cutadapt --help
 
 
 # ```
@@ -394,6 +374,113 @@ for sample in samples:
     get_ipython().system('cutadapt -j 0 --nextseq-trim=15 --action=trim -a \'{barcode3}{adapter};e=0.15;o=6;anywhere;\'             -n 2 -u 5 -u -5 --max-n=0 -q 15 -m 20 -l 80             --length 30              --rename=\'{{id}}_{{cut_prefix}}{{cut_suffix}} {{comment}}\'             --too-short-output={fname(out_path,sample,"fastq_tooshort")}              -o {fname(out_path,sample,"fq.gz")}               {fname(in_path,sample,"fq.gz")} > {fname(out_path,sample,"log")}')
 
 
+# #### Analysis
+
+# Take a look at a FASTQ file
+
+# In[ ]:
+
+
+in_fn  = fname(in_path,treated[0],'fq.gz')
+out_fn = fname(out_path,treated[0],'fq.gz')
+out_fn
+
+
+# In[ ]:
+
+
+get_ipython().system(' zcat {in_fn}|head -16')
+
+
+# In[ ]:
+
+
+def show_adapter(reads):
+    for read in reads.split('\n'):
+        read = read.replace(adapter, f'<span style="color: blue;">{barcode3}{adapter}</span>')
+        display(HTML(read))
+
+
+# Look for adapter in untrimmed reads
+
+# In[ ]:
+
+
+reads = get_ipython().getoutput(" zcat {in_fn} | head -36  | seqtk seq -A |grep -v '>'")
+reads = ('\n').join(reads)
+show_adapter(reads)
+
+
+# Verify that adapters and all downstream elements of reads have been trimmed
+
+# In[ ]:
+
+
+reads = get_ipython().getoutput("zcat {out_fn}| head -36  | seqtk seq -A |grep -v '>'")
+reads = ('\n').join(reads)
+show_adapter(reads)
+
+
+# In[ ]:
+
+
+get_ipython().system('ls {out_path}')
+
+
+# What did `--rename='{{id}}_{{cut_prefix}}{{cut_suffix}} {{comment}}'` do?
+# 
+# It appears to has included in the fastq header, an id comprised of the first and last 5 nt cut by `-u 5` and `-u -5`
+
+# In[ ]:
+
+
+get_ipython().system(' zcat {in_fn}|head -2')
+
+
+# In[ ]:
+
+
+get_ipython().system('zcat {out_fn}| head -2')
+
+
+# Too slow for large files. Commented out.
+
+# In[ ]:
+
+
+#files = [fname(in_path,sample, "fq.gz") for sample in samples]
+#res = []
+#for f in files:
+#    n = !seqtk seq -A {f}|grep -v '>'|wc -c
+#    res.append(int(n[0]))
+#ins = res
+#ins
+
+
+# In[ ]:
+
+
+#files = [fname(out_path,sample, "fq.gz") for sample in samples]
+#res = []
+#for f in files:
+#    n = !seqtk seq -A {f}|grep -v '>'|wc -c
+#    res.append(int(n[0]))
+#outs = res
+#outs
+
+
+# In[ ]:
+
+
+#make_table(ins, outs, "Origs", "Trimmed", "Sum of Total Read Lengths", samples, "Sum of Total Reads Per Sample")
+
+
+# In[ ]:
+
+
+#reads = !xargs zcat {out_path}/*.gz | seqtk seq -A  |grep -v ">" 
+#ds = [len(read) for read in reads]
+#make_histogram(ds, "Read Length", "Trimmed Reads")
 
 
 # ## Step: fastqc_post
@@ -405,7 +492,6 @@ for sample in samples:
 
 in_path = mkpath("trim")
 out_path = mkpath("fastqc_post")
-print(out_time())
 
 
 # In[ ]:
@@ -438,7 +524,6 @@ get_ipython().system(' ls {out_path}')
 
 in_path = mkpath("trim")
 out_path = mkpath("hisat3n_align")
-print(out_time())
 
 
 # #### hisat-3n
@@ -448,7 +533,7 @@ print(out_time())
 # In[ ]:
 
 
-get_ipython().system(' hisat-3n --help')
+#! hisat-3n --help
 
 
 # ```
@@ -522,7 +607,6 @@ get_ipython().system(" grep -v '@' {out_path}/t1.sam |head -1")
 
 in_path = mkpath("hisat3n_align")
 out_path = mkpath("hisat3n_sort")
-print(out_time())
 
 
 # #### samtools
@@ -579,7 +663,6 @@ get_ipython().system(' ls -lh {out_path}')
 
 in_path = mkpath("hisat3n_sort")
 out_path = mkpath("hisat3n_dedup")
-print(out_time())
 
 
 # #### umicollapse
@@ -625,7 +708,6 @@ get_ipython().system(' cat {out_path}/t2.log')
 
 in_path = mkpath("hisat3n_dedup")
 out_path = mkpath("hisat3n_call")
-print(out_time())
 
 
 # #### hisat-3n-table
@@ -683,21 +765,3 @@ for sample in samples:
     df_f = df[df['unconvertedBaseCount'] > df['convertedBaseCount']]
     df_f.to_csv(fname(out_path,sample,'called.csv'),index=False)  # Set index=False i
 
-
-# **How long did the Notebook Sesson Last or Script Run?**
-
-# In[ ]:
-
-
-end_time = out_time(message="Session Ended")
-print(end_time)
-
-
-# In[ ]:
-
-
-print(start_time)
-print(end_time)
-
-
-# In[ ]:
