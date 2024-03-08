@@ -33,24 +33,23 @@
 #   smallRNA_r1: TGGAATTCTCGGGTGCCAAGGAACTCCAGTCAC
 #   # R2 read the smallRNA p7
 #   smallRNA_r2: GATCGTCGGACTGTAGAACTCT
-
+#
 # Sample name should be unique and listed in the 2nd level of the yaml file
-# Each sample will be analysis separately, but
-# samples sharing the same group id will be regarded as biological replicates and combined in the comparing step
+# Each sample will be analyzed separately, but samples sharing the same group id
+# will be regarded as biological replicates and combined in the comparing step
 # data: is a list of runs, each either single or pair-ended
 #
+# CBD Samples
 # samples:
 #   t1:
 #     description: HeLa polyA+ RNA treated with ultrafast BS, replicate 3
 #     group: treated
 #     other: SRR23538290
 #     data:
-#       - R1: data/test1.1_R1.fq.gz
-#         R2: data/test1.1_R2.fq.gz
-#       - R1: data/test_1.2_R1.fq.gz
-#         R2: data/test1.2_R2.fq.gz
-#       - R1: data/test1.3_R1.fq.gz
-#         R2: data/test1.3_R2.fq.gz
+#       - R1: data/test1_R1.fq.gz
+#       - R1: data/test1.1_R1
+#       - R1: data/test1.2_R1
+#         R2: data/test1.2_R2
 #   t2:
 #     description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 2"
 #     group: treated
@@ -63,7 +62,6 @@
 #     other: SRR23538292
 #     data:
 #       - R1: data/test3_R1.fq.gz
-
 
 
 reference:
@@ -84,9 +82,7 @@ samples:
     other: SRR23538290
     data:
       - R1: data/test1_R1.fq.gz
-      - R1: data/test1.1_R1
-      - R1: data/test1.2_R1
-        R2: data/test1.2_R2
+
   t2:
     description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 2"
     group: treated
@@ -99,7 +95,3 @@ samples:
     other: SRR23538292
     data:
       - R1: data/test3_R1.fq.gz
-
-data_dir: ../data
-ref_dir: ../reference
-src_dir: ../src
