@@ -34,58 +34,71 @@
 #   # R2 read the smallRNA p7
 #   smallRNA_r2: GATCGTCGGACTGTAGAACTCT
 
-# Sample name should be indentical and listed in the 2nd level of the yaml file
-# Each sample will be analysis seperately, but
-# samples sharing the same group id will be regared as biological replicates and combined in the comparing step
+# Sample name should be unique and listed in the 2nd level of the yaml file
+# Each sample will be analysis separately, but
+# samples sharing the same group id will be regarded as biological replicates and combined in the comparing step
+# data: is a list of runs, each either single or pair-ended
+#
 # samples:
-#   CONTROL-rep1:
+#   t1:
+#     description: HeLa polyA+ RNA treated with ultrafast BS, replicate 3
+#     group: treated
+#     other: SRR23538290
 #     data:
-#       - R1: ../data/test1_R1.fq.gz
-#         R2: ../data/test1_R2.fq.gz
-#     group: CONTROL
-#   DRUG-rep1:
+#       - R1: data/test1.1_R1.fq.gz
+#         R2: data/test1.1_R2.fq.gz
+#       - R1: data/test_1.2_R1.fq.gz
+#         R2: data/test1.2_R2.fq.gz
+#       - R1: data/test1.3_R1.fq.gz
+#         R2: data/test1.3_R2.fq.gz
+#   t2:
+#     description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 2"
+#     group: treated
+#     other: SRR23538291
 #     data:
-#       - R1: ../data/test2_R1.fq.gz
-#         R2: ../data/test2_R2.fq.gz
-#     group: DRUG
-#   DRUG-rep2:
+#       - R1: data/test2_R1.fq.gz
+#   c1:
+#     description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 1"
+#     group: control
+#     other: SRR23538292
 #     data:
-#       - R1: ../data/test3_R1.fq.gz
-#         R2: ../data/test3_R2.fq.gz
-#     group: DRUG
+#       - R1: data/test3_R1.fq.gz
+
 
 
 reference:
   contamination:
-    fa: ~/reference/genome/contamination/contamination.fa
-    hisat3n: ~/reference/index/hisat3n/contamination/contamination
+    fa: reference/genome/contamination/contamination.fa
+    hisat3n: reference/index/hisat3n/contamination/contamination
   genes:
-    fa: ~/reference/genome/Homo_sapiens.GRCh38.sncRNA.fa
-    hisat3n: ~/reference/index/hisat3n/Homo_sapiens.GRCh38.sncRNA/Homo_sapiens.GRCh38.sncRNA
+    fa: reference/genome/Homo_sapiens.GRCh38.sncRNA.fa
+    hisat3n: reference/index/hisat3n/Homo_sapiens.GRCh38.sncRNA/Homo_sapiens.GRCh38.sncRNA
   genome:
-    fa: ~/reference/genome/Homo_sapiens.GRCh38.genome.fa
-    hisat3n: ~/reference/index/hisat3n/Homo_sapiens.GRCh38.genome/Homo_sapiens.GRCh38.genome
+    fa: reference/genome/Homo_sapiens.GRCh38.genome.fa
+    hisat3n: reference/index/hisat3n/Homo_sapiens.GRCh38.genome/Homo_sapiens.GRCh38.genome
 
 samples:
   t1:
-    data:
-      - R1: ~/data/test1_R1.fq.gz
+    description: HeLa polyA+ RNA treated with ultrafast BS, replicate 3
     group: treated
-    srr: SRR23538290
-    description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 3"
+    other: SRR23538290
+    data:
+      - R1: data/test1_R1.fq.gz
+      - R1: data/test1.1_R1
+      - R1: data/test1.2_R1
+        R2: data/test1.2_R2
   t2:
-    data:
-      - R1: ~/data/test2_R1.fq.gz
-    group: treated
-    srr: SRR23538291
     description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 2"
-  c1:
+    group: treated
+    other: SRR23538291
     data:
-      - R1: ~/data/test3_R1.fq.gz
-    group: control
-    srr: SRR23538292
+      - R1: data/test2_R1.fq.gz
+  c1:
     description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 1"
-
+    group: control
+    other: SRR23538292
+    data:
+      - R1: data/test3_R1.fq.gz
 
 data_dir: ../data
 ref_dir: ../reference

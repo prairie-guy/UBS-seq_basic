@@ -13,20 +13,47 @@ workdir: "workspace"
 # change this one to your own
 SPECIES = "GRCh38"
 
-<<CBD: How are each of these used? >>
-CUSTOMIZED_GENES = [] <<CBD: Are these genes to be used in experiment; Need reference fasta? >>
-LIBRARY_STRATEGY = "INLINE" <<CBD: What is INLINE? Other strategies: TAKARAV3, SWIFT, STRANDED. Why and how are each used? >>
-STRANDNESS = "F" <<CBD: This is the default. Where is this relevent? Cutadapt, alignment? >>
+<<CBD: How are CUSTOMIZED_GENES used?
+Filter out tRNA or rRNA in mapping genes: hisat2_3n_mapping _genes -> histat_3n_mapping_genomes ->
+histat_3n_mapping_contamination
+tRNA, rRNA would be added to CUSTOMIZED_GENES
+Not needed for DNA>>
+CUSTOMIZED_GENES = []
+
+<<CBD: What is INLINE? Other strategies: TAKARAV3, SWIFT, STRANDED. Why and how are each used?
+INLINE is the default. STRANDED is a reverse complement (No UMI) R>>
+LIBRARY_STRATEGY = "INLINE"
+
+<<CBD: This is the default. Where is this relevent? Cutadapt, alignment?
+This is largely relates to the choice of RNA??>>
+STRANDNESS = "F"
+
 REF = config["reference"]
-REFTYPES = ["genes", "genome", "contamination"] <<CBD: Is this used for reference fasta? What is the strategy here? I did not see any filtering of rRNA, tRNA or contamination? Are these run for each sample? >>
-REFTYPES_CALL = ["genes", "genome"] <<CBD: Is genes for mRNA and genome for DNA? How are these set in config.yaml? >>
+
+<<CBD: Is this used for reference fasta? What is the strategy here?
+I did not see any filtering of rRNA, tRNA or contamination? Are these run for each sample?
+Mapping: 1 mapping genes, 2 mapping genoome 3 mapping contaminaiton With each feeding the next.>>
+REFTYPES = ["genes", "genome", "contamination"]
+
+<<CBD: Is genes for mRNA and genome for DNA? How are these set in config.yaml?
+No, this is just the default behavior>>
+REFTYPES_CALL = ["genes", "genome"]
 
 
 read_ids = ["R1", "R2"]
-pairend_run_ids = [] <<CBD: What are these used for? >>
+
+<<CBD: What are these used for?
+Not a major issue>>
+pairend_run_ids = []
+
 sample2data = defaultdict(dict)
+
 group2sample = defaultdict(list)
-for s, v in config["samples"].items(): <<CBD: Are groups considered to be replicates? Are runs elements of a group? >>
+
+<<CBD: Are groups considered to be replicates? Are runs elements of a group?
+There are three concepts: 1. Sample, 2. Groups, which may be biological replicates and
+3. Runs, which are multiple results from same library>>
+for s, v in config["samples"].items():
     # picked treated samples only
     # if "treated" in s:
     if v.get("treated", True):
@@ -228,7 +255,8 @@ rule report_cutadapt_SE:
 # The libraries of TAKARA v3 KIT is too long, so there is too much unjoined reads.
 # run in PE mode to save the reads
 
-<<CBD: How far through the pipeline must paired ends be condidered seperately> qc, cutadapt, hisat-3n_mapping, sorting, joining >>
+<<CBD: How far through the pipeline must paired ends be condidered seperately
+qc, cutadapt, hisat-3n_mapping, sorting, joining >>
 rule cutadapt_PE:
     input:
         "merged_reads/{sample}_{rn}.un1.fq.gz",
@@ -433,7 +461,11 @@ rule report_falco_after:
 # If study virus, then also premap to virus genome
 
 
-<<CBD: Prepared for customized. For default which version of index used? --repeat-index required 256 Gb RAM. What does this do? Can I use yours. Does any version of GRCh38 work? Using v.110 from Ensemble. >>
+<<CBD: Prepared for customized. For default which version of index used?
+--repeat-index required 256 Gb RAM. What does this do? Can I use yours. Does any version of GRCh38 work? Using v.110 from Ensemble
+Major releases have the same coordinate systems, so indexes and annotations can be used across the same major release.
+OK to use --repeat-index created by for GRCh38 can be uesed with different versions of minor fasta versions>>
+>>
 rule prepare_genes_index:
     input:
         CUSTOMIZED_GENES,
@@ -480,13 +512,23 @@ rule hisat2_3n_mapping_genes:
     shell:
         """
         export TMPDIR="/scratch/midway3/yec"
-        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} --new-summary -q -U {input[0]} {params.mapping} --all --norc --base-change C,T --mp 8,2 --no-spliced-alignment --un {output.fq} -S {output.sam}
+        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} \
+        --new-summary -q -U {input[0]} {params.mapping} --all --norc --base-change C,T --mp 8,2\
+        --no-spliced-alignment --un {output.fq} -S {output.sam}
         """
 
-<<CBD: What is directional mapping? --directional-mapping (F) vs. --directional-mapping-reverse (R) vs. nothing>>
-<<CBD: What does --norc (No reverse complement) >>
-<<CBD: How to use --no-spliced-alignment >>
-<<CBd: How to use --pen-noncansplice 20 >>
+<<CBD: What is directional mapping? --directional-mapping (F) vs. --directional-mapping-reverse (R) vs. nothing
+--directional-mapping/--directional-mapping-reverse is only relevant for RNA. DNA is both
+This is really optimization as one wouldnt expect it to matter much. It can save time if RNA to avoid
+having to map twice>>
+
+<<CBD: What does --norc (No reverse complement)
+For gene mapping, not required. Only for genome. Mostly optimization related to avoid 2x mapping>>
+
+<<CBD: How to use --no-spliced-alignment
+Not needed for genes, but needed for genome for RNA data. (For DNA not needed at all)>>
+
+<<CBD: How to use --pen-noncansplice 20 >>
 rule hisat2_3n_mapping_genome:
     input:
         "run_mapping_SE/{sample}_{rn}.genes.fq",
@@ -508,7 +550,9 @@ rule hisat2_3n_mapping_genome:
     shell:
         """
         export TMPDIR="/scratch/midway3/yec"
-        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} --new-summary -q -U {input[0]} {params.mapping} --base-change C,T --pen-noncansplice 20 --mp 4,1 --un {output.fq} -S {output.sam}
+        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} \
+        --new-summary -q -U {input[0]} {params.mapping} --base-change C,T --pen-noncansplice 20 \
+        --mp 4,1 --un {output.fq} -S {output.sam}
         """
 
 
@@ -533,7 +577,9 @@ rule hisat2_3n_mapping_contamination:
     shell:
         """
         export TMPDIR="/scratch/midway3/yec"
-        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} --new-summary -q -U {input[0]} {params.mapping} --base-change C,T --mp 8,2 --no-spliced-alignment --un-gz {output.fqz} -S {output.sam}
+        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} \
+        --new-summary -q -U {input[0]} {params.mapping} --base-change C,T --mp 8,2 \
+        --no-spliced-alignment --un-gz {output.fqz} -S {output.sam}
         """
 
 
@@ -567,7 +613,9 @@ rule hisat2_3n_mapping_genes_PE:
     shell:
         """
         export TMPDIR="/scratch/midway3/yec"
-        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} --new-summary -q -1 {input[0]} -2 {input[1]} {params.mapping} --all --norc --base-change C,T --mp 8,2 --no-spliced-alignment --un-conc {params.un} -S {output.sam}
+        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} \
+        --new-summary -q -1 {input[0]} -2 {input[1]} {params.mapping} --all --norc --base-change C,T \
+        --mp 8,2 --no-spliced-alignment --un-conc {params.un} -S {output.sam}
         """
 
 
@@ -595,7 +643,9 @@ rule hisat2_3n_mapping_genome_PE:
     shell:
         """
         export TMPDIR="/scratch/midway3/yec"
-        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} --new-summary -q -1 {input[0]} -2 {input[1]} {params.mapping} --base-change C,T --pen-noncansplice 20 --mp 4,1 --un-conc {params.un} -S {output.sam}
+        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} \
+        --new-summary -q -1 {input[0]} -2 {input[1]} {params.mapping} --base-change C,T \
+        --pen-noncansplice 20 --mp 4,1 --un-conc {params.un} -S {output.sam}
         """
 
 
@@ -623,7 +673,9 @@ rule hisat2_3n_mapping_contamination_PE:
     shell:
         """
         export TMPDIR="/scratch/midway3/yec"
-        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} --new-summary -q -1 {input[0]} -2 {input[1]} {params.mapping} --base-change C,T --mp 8,2 --no-spliced-alignment --un-conc-gz {params.un} -S {output.sam}
+        {params.hisat3n} --index {params.index} -p {threads} --summary-file {output.summary} \
+        --new-summary -q -1 {input[0]} -2 {input[1]} {params.mapping} --base-change C,T \
+        --mp 8,2 --no-spliced-alignment --un-conc-gz {params.un} -S {output.sam}
         """
 
 
@@ -661,7 +713,9 @@ rule hisat2_3n_sort_PE:
         {params.samtools} view -@ {threads} -F4 -b {input} | {params.samtools} sort -@ {threads} --write-index -m 4G -O BAM -o {output} -
         """
 
-<<CBD: In joining SE and PE mappings, is it typical to have SE joined with PE? What is being merged? It looks like runs (same as replicates) are kept seperate >>
+<<CBD: In joining SE and PE mappings, is it typical to have SE joined with PE? What is being merged?
+This is a non-typical pipeline. It would arise when using both SE and PE in same experiment. Rare.
+Not a high priority to include>>
 rule join_SE_and_PE_mapping:
     input:
         "run_mapping_SE/{sample}_{rn}.{ref}.bam",
@@ -683,8 +737,9 @@ rule join_SE_and_PE_mapping:
 
 
 <<CBD: In combining runs, is this the same as merging all groups together. For example, all of treated and all of control. For example, does t1,t2 -> t and c1 -> c >>
-<<CBD: In combining runs, do we lose the ability for to look at replicates against one another>>
-       What does "combined_mapping/{sample}.{ref}.bam" do? Does {t_1, t_2} -> t and {c1} -> c >>
+Runs are different than biological replicates or groups.
+
+<<CBD: What does "combined_mapping/{sample}.{ref}.bam" do? Does {t_1, t_2} -> t and {c1} -> c >>
 rule combine_runs:
     input:
         lambda wildcards: [
@@ -736,7 +791,8 @@ rule count_cutadapt_reads:
 ## stat mapping
 
 <<CBD: stat_mapping looks to be creating a tsv file for REFTYPES = ["genes", "genome", "contamination"]. Finds number  of high quality reads>>
-<<CBD: Why not filter out these reads? >>
+<<CBD: Why not filter out these reads?
+Filtering for 3980 is not needed as this is done by HISAT-3N>>
 rule stat_mapping_number:
     input:
         bam=lambda wildcards: [
@@ -858,7 +914,8 @@ rule hisat2_3n_calling_unfiltered_multi:
 ## filter cluster effect and call mutation
 
 <<CBD: Filter (uncalled) combined deduped >>
-<<CBD: Why only < 4 mutations? >>
+<<CBD: Why only < 4 mutations?
+Filtering is done on a read level, not on a pos>>
 <<CBD: Technically output is not really converted>>
 rule hisat2_3n_filtering:
     input:
@@ -951,7 +1008,8 @@ rule calculate_methylation_rate:
 ## picked sites and merge table
 
 <<CBD: Need select_called_sites_v3.py >>
-<<CBD: What is logic? >>
+<<CBD: What is logic?
+Methylation by group for filtered and unfiltered>>
 rule select_called_sites:
     input:
         # in paries
@@ -1012,7 +1070,7 @@ rule pick_background_sites:
         bgzip -c > {output}
         """
 
-
+<<CBD: combining groups vs. runs >>
 rule sumup_background_sites_by_group:
     input:
         # in paries
