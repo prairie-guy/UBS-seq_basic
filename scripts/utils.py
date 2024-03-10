@@ -19,7 +19,7 @@ def mkpath(path):
     path = Path(path)
     if not os.path.exists(path): os.makedirs(path)
     date = subprocess.getoutput('date "+%H:%M:%S_%m-%d-%Y"')
-    print(f">>> {{{path}}} {date[0]}")
+    print(f">>> {{{path}}} {date}")
     return path
 
 def nlines(file):
@@ -27,11 +27,6 @@ def nlines(file):
     result = subprocess.run(['wc', '-l', file], stdout=subprocess.PIPE)
     n = int(result.stdout.split()[0])
     return n
-
-def nseqs(bam_fastq):
-    'Returns number of sequences in bam, sam, fasta or fastq file'
-    n = subprocess.getoutput('samtools view -c {bam_fastq}')
-    return int(n[0])
 
 def samples_string(samples,path,suffix='bam'):
     'Returns a space delimited string of sample files'
