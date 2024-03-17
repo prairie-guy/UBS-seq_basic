@@ -15,21 +15,6 @@ from itertools import compress
 home_path      = Path.cwd()/'..'
 config = load_configfile(home_path/"config.yaml")
 
-# def parse_samples():
-#     read_ids = ["R1", "R2"]
-#     pairend_run_ids = []
-#     sample2data = defaultdict(dict)
-#     group2sample = defaultdict(list)
-#     for s, v in config["samples"].items():
-#         if v.get("treated", True):
-#             group2sample[v["group"]].append(s)
-#         for i, v2 in enumerate(v["data"], 1):
-#             r = f"r{i}"
-#             sample2data[s][r] = {k3: home_path/v3 for k3, v3 in v2.items()}
-#             if len(v2) == 2:
-#                 pairend_run_ids.append(s + "_" + r)
-#     return sample2data, group2sample
-
 
 def parse_samples(config):
     read_ids = ["R1", "R2"]
@@ -123,8 +108,6 @@ def data(se=True, keys=False):
         False: {False: ((f'{s}_{r}', sample2data[s][r][r1], sample2data[s][r][r2]) for s,r,r1,r2 in samples(se=False,keys=True)),
                 True:  ((s,r, sample2data[s][r][r1], sample2data[s][r][r2]) for s,r,r1,r2 in samples(se=False,keys=True))}}
     return results[se][keys]
-    #if se:  return ((f'{s}_{r}',sample2data[s][r].values())  for s,r in samples(se=True,keys=True))
-    #if not se: return ((f'{s}_{r}',sample2data[s][r][r1], sample2data[s][r][r2]) for s,r,r1,r2 in samples(se=False,keys=True))
 
 
 def groups(n=2):

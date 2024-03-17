@@ -4,18 +4,81 @@
 #
 #
 
-import os, sys, subprocess
+import os, sys, subprocess, re,itertools
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt
 from pathlib import Path
+from importlib import reload
 
-def fname(path, base, sufix):
-    'Return a path and suffix complete filename'
-    return Path(path)/f"{base}.{sufix}"
+def fname(path, base, suffix, tail=''):
+    'Return a `path` and `suffix` complete filename. Optionally, append _`tail` to base'
+    return Path(path)/f"{base}.{suffix}" if not tail else Path(path)/f"{base}_{tail}.{suffix}"
+
+
+# def fname_split(filepath):
+#     filepath = Path(filepath)
+#     base, _, extension = filepath.name.partition('.')
+#     parts = base.split('_')
+#     return {
+#         'path': filepath.parent if filepath.parent != Path('.') else False,
+#         'keys': parts if parts else [],
+#         'ext': extension if extension else False}
+
+def fname_split(filepath):
+    filepath = Path(filepath)
+    base, _, extension = filepath.name.partition('.')
+    parts = base.split('_')
+    return {
+        'path': filepath.parent if filepath.parent != Path('.') else False,
+        'keys': parts if parts else [],
+        'ext': extension if extension else False,
+        'stem': '_'.join(parts)}
+
+
+def fnames_index(path, suffix):
+    """
+    Takes a `path` and `suffix` and returns a list of keys delmited by '_' by each fname
+    `tail=False` removes the tail key
+
+    fnames_index(in_path,'bam') ->
+        [['t1', 'r2', 'genome'],
+         ['t1', 'r2', 'genes'],
+         ['t1', 'r1', 'genome'],
+         ['c1', 'r1', 'genes'],
+         ['c1', 'r1', 'genome'],
+         ['t1', 'r1', 'genes']]
+    """
+    pattern = f'*.{suffix}'
+    return(p.stem.split('_') for p in Path.glob(path,pattern))
+
+
+def make_pattern(pattern):
+    pattern = re.sub('}.*?{', r'}.*{', pattern)
+    pattern = re.sub('\.(\w+)$', r'\.\1', pattern)
+    pattern = re.sub('\+(\{ext\})', r'+\\.\1', pattern)
+    return fr"{pattern}"
+
+
+def expand_wildcards(pattern, wildcards):
+    wildcard_names = re.findall(r'{(\w+)}', pattern)
+    wildcard_values = [wildcards[name] for name in wildcard_names]
+    combinations = itertools.product(*wildcard_values)
+    expanded_strings = [pattern.format(**dict(zip(wildcard_names, comb))) for comb in combinations]
+    return expanded_strings
+
+def match_files(files, pattern, **wildcards):
+    results = []
+    regx = make_pattern(pattern)
+    #print(regx)
+    #print(wildcards)
+    for pat in expand_wildcards(regx, wildcards):
+        fn = [m.group(0) for f in files if (m := re.match(pat, f))]
+        if fn: results.append(fn)
+    return results
 
 def mkpath(path):
-    'Return dir path name; creates (not over-writting) a new dir within the pwd. Also prints date/time executed'
+    'Return `path` name; creates (not over-writting) a new dir within the pwd. Also prints date/time executed'
     path = Path(path)
     if not os.path.exists(path): os.makedirs(path)
     date = subprocess.getoutput('date "+%H:%M:%S_%m-%d-%Y"')
