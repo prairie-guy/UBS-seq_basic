@@ -15,15 +15,8 @@ def fname(path, base, suffix, tail=''):
     'Return a `path` and `suffix` complete filename. Optionally, append _`tail` to base'
     return Path(path)/f"{base}.{suffix}" if not tail else Path(path)/f"{base}_{tail}.{suffix}"
 
-
-# def fname_split(filepath):
-#     filepath = Path(filepath)
-#     base, _, extension = filepath.name.partition('.')
-#     parts = base.split('_')
-#     return {
-#         'path': filepath.parent if filepath.parent != Path('.') else False,
-#         'keys': parts if parts else [],
-#         'ext': extension if extension else False}
+def fnames(path, suffix):
+    return [f.name for f in path.glob(f'*.{suffix}')]
 
 def fname_split(filepath):
     filepath = Path(filepath)
@@ -33,8 +26,8 @@ def fname_split(filepath):
         'path': filepath.parent if filepath.parent != Path('.') else False,
         'keys': parts if parts else [],
         'ext': extension if extension else False,
-        'stem': '_'.join(parts)}
-
+        'stem': '_'.join(parts),
+        'name': filepath.name}
 
 def fnames_index(path, suffix):
     """
@@ -53,21 +46,37 @@ def fnames_index(path, suffix):
     return(p.stem.split('_') for p in Path.glob(path,pattern))
 
 
-def make_pattern(pattern):
-    pattern = re.sub('}.*?{', r'}.*{', pattern)
-    pattern = re.sub('\.(\w+)$', r'\.\1', pattern)
-    pattern = re.sub('\+(\{ext\})', r'+\\.\1', pattern)
-    return fr"{pattern}"
+# def make_pattern(pattern):
+#     pattern = re.sub('}.*?{', r'}.*{', pattern)
+#     pattern = re.sub('\.(\w+)$', r'\.\1', pattern)
+#     pattern = re.sub('\+(\{ext\})', r'+\\.\1', pattern)
+#     return fr"{pattern}"
 
 
-def expand_wildcards(pattern, wildcards):
-    wildcard_names = re.findall(r'{(\w+)}', pattern)
-    wildcard_values = [wildcards[name] for name in wildcard_names]
-    combinations = itertools.product(*wildcard_values)
-    expanded_strings = [pattern.format(**dict(zip(wildcard_names, comb))) for comb in combinations]
-    return expanded_strings
+
+# def make_pattern(pattern):
+#     pattern = re.sub('}.*?{', r'}.*{', pattern)
+#     pattern = re.sub('\\.\\w+$', r'\\.\\w+', pattern)
+#     pattern = re.sub('({\\w+})/({\\w+})', r'\\1/\\2', pattern)
+#     pattern = re.sub('\\+({\\w+})', r'+\\\\.\\1', pattern)
+#     return fr"{pattern}"
+
+
 
 def match_files(files, pattern, **wildcards):
+    def make_pattern(pattern):
+        pattern = re.sub('}.*?{', r'}.*{', pattern)
+        pattern = re.sub('\\.\\w+$', r'\\.\\w+', pattern)
+        pattern = re.sub('\\+({\\w+})', r'+\\\\.\\1', pattern)
+        return fr"{pattern}"
+
+    def expand_wildcards(pattern, wildcards):
+        wildcard_names = re.findall(r'{(\w+)}', pattern)
+        wildcard_values = [wildcards[name] for name in wildcard_names]
+        combinations = itertools.product(*wildcard_values)
+        expanded_strings = [pattern.format(**dict(zip(wildcard_names, comb))) for comb in combinations]
+        return expanded_strings
+
     results = []
     regx = make_pattern(pattern)
     #print(regx)
