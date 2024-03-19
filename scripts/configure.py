@@ -1,8 +1,23 @@
 #!/usr/bin/env python3
 
-# Configure samples from config.yaml. Create data structure and corresponding access functions
-# Defines iterator generator: samples(), data() and group()
+# `configure.py`
+#
+# C. Bryan Daniels, cdaniels@nandor.net
+# 03/17/2024
 # sample2data and group2sample data structures developed by Chang Ye
+#
+# Configure sequencing samples from config.yaml.
+#
+# Create data structures and functions to operate on samples defined in confi.yaml
+# This module can consume and generate data structures as defined in config.yaml
+# Generally, the return type is iterator
+# Major operators are: `samples()`, `data()` , `groups()`, `samples2data`,`group2sample,group2run`
+# These operators are NOT intended to be used for actual files
+# (See `utils.py` for operators to be used for use with paths and files)
+#
+# ToDo: Add additional functionality for other elements of `config.yaml`, including `references`
+#
+# Reminder: The term `sample` refers to objects generate from config.yaml
 
 import os, sys
 from pathlib import *
@@ -109,10 +124,19 @@ def data(se=True, keys=False):
                 True:  ((s,r, sample2data[s][r][r1], sample2data[s][r][r2]) for s,r,r1,r2 in samples(se=False,keys=True))}}
     return results[se][keys]
 
-
 def groups(n=2):
     if n == 1: return ((s, g) for g, items in group2sample.items() for s in items)
     if n == 2: return ((s, g) for g, items in group2run.items() for s in items)
+
+def samples_string(samples, path, suffix, delimiter=' '):
+    """
+    Returns a string of delimited (by delimiter) filenames. Generally, input to a shell script.
+    `samples` are NOT files, but an iterator generated with `sample()`; There are no suffixes.
+    `path` is wither a string or Path type. Used by `fname()`
+    `suffix` is used by `fname()`
+    `delimiter` is a bool. By default: delimter = ' '
+    """
+    return  delimiter.join([str(fname(path,sample,suffix)) for sample in samples])
 
 # [f"{s}_{r}" for s, v in sample2data.items() for r in v.keys()]
 # [(f"{s}_{r}" ,d) for s, v in sample2data.items() for r, ds in v.items() for d in ds.values()]
