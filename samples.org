@@ -1,0 +1,11 @@
+#+title: Samples
+
+| ID | Run | Strand | Group   | SRR           | Description                                               | Species |
+|----+-----+--------+---------+---------------+-----------------------------------------------------------+---------|
+| t1 | r1  | R1     | Treated | SRR23538292   | WT HeLa polyA+ RNA treated with ultrafast BS, replicate 1 | Human   |
+| t1 | r1  | R1     | Treated | SRR23538291   | WT HeLa polyA+ RNA treated with ultrafast BS, replicate 2 | Human   |
+| t2 | r1  | R1     | Treated | SRR23538294_1 | 7ng of cfDNA treated with ultrafast BS, replicate 1       | Human   |
+| t2 | r1  | R2     | Treated | SRR23538294_2 | 7ng of cfDNA treated with ultrafast BS, replicate 1       | Human   |
+| t2 | r2  | R1     | Treated | SRR23538293_1 | 7ng of cfDNA treated with ultrafast BS, replicate 2       | Human   |
+| t2 | r2  | R2     | Treated | SRR23538293_2 | 7ng of cfDNA treated with ultrafast BS, replicate 2       | Human   |
+| c1 | r1  | R1     | Control | SRR23538290   | WT HeLa polyA+ RNA treated with ultrafast BS, replicate 3 | Human   |

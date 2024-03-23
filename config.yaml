@@ -50,6 +50,28 @@ reference:
   genome:
     fa: reference/genome/Homo_sapiens.GRCh38.genome.fa
     hisat3n: reference/index/hisat3n/Homo_sapiens.GRCh38.genome/Homo_sapiens.GRCh38.genome
+
+samples:
+  t1:
+    description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 1, replicate 2"
+    group: treated
+    data:
+      - R1: data/SRR23538292.fq.gz
+      - R1: data/SRR23538291.fq.gz
+  t2:
+    description: "7ng of cfDNA treated with ultrafast BS, replicate 1, replicate 2"
+    group: treated
+    data:
+      - R1: data/SRR23538294_1.fq.gz
+        R2: data/SRR23538294_2.fq.gz
+      - R1: data/SRR23538293_1.fq.gz
+        R2: data/SRR23538293_2.fq.gz
+  c1:
+    description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 3"
+    group: control
+    data:
+      - R1: data/SRR23538290.fq.gz
+
 # samples:
 #   t1:
 #     description: HeLa polyA+ RNA treated with ultrafast BS, replicate 3
@@ -73,7 +95,7 @@ reference:
 #     group: control
 #     other: SRR23538292
 #     data:
-#       - R1: data/test3_R1.fq.gz
+#      - R1: data/test3_R1.fq.gz
 
 # samples:
 #   t1:
@@ -94,18 +116,3 @@ reference:
 #     other: SRR23538292
 #     data:
 #       - R1: data/test3_R1.fq.gz
-
-samples:
-  t1:
-    description: HeLa polyA+ RNA treated with ultrafast BS, replicate 3
-    group: treated
-    other: SRR23538290
-    data:
-      - R1: data/test1_R1.fq.gz
-      - R1: data/test2_R1.fq.gz
-  c1:
-    description: "HeLa polyA+ RNA treated with ultrafast BS, replicate 1"
-    group: control
-    other: SRR23538292
-    data:
-      - R1: data/test3_R1.fq.gz
