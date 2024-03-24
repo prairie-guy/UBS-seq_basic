@@ -2,6 +2,8 @@
 
 # Changing Random Seed from default of 11;
 # Note: As 'random' is deterministic, PE reads will have corresponding pairs selected
+#
+# usage: scripts/downsize.sh [.01]
 seed="131"
 
 if [ -z "$1" ]; then

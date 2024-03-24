@@ -126,6 +126,57 @@ def fnames(dir_or_files, suffix="", key='stem'):
 
     return list(map(lambda f: fname_index(f)[key], files))
 
+def fnames2(dir_or_files, key='stem', pattern = '', **wildcards):
+    """
+    fnames :: str      -> str -> str -> [str]
+    fnames :: Path     -> str -> str -> [str]
+    fnames :: [str]    -> str -> str -> [str]
+    fnames :: Iterator -> str -> str -> [str]
+
+    Returns a list of filenames
+    `dir_or_files` can be: a string or Path name of a dir; a list of file names; an Iterator of file names.
+    `suffix` is a string by which to filter files, returning only those ending in .`suffix`
+    `key` specifies which value of `fname_index(f)` is returned for each file name. Example use of `key`
+        fname_index('map_se/t1_r1_genes.bam') ->
+            'full':   map_se/t1_r1_genes.bam
+            'path':   map_se
+            'name':   t1_r1_genes.bam
+            'stem':   t1_r1_genes
+            'suffix': bam
+            'keys':   ['t1', 'r1', 'genes']
+
+    Examples:
+    fnames('map_se') ->
+        ['map_se/t1_r1_genome.summary', 'map_se/t1_r1_genes.bam.csi', 'map_se/t1_r2_genome.bam', ...]
+    fnames('map_se', 'bam') ->
+        ['map_se/t1_r2_genome.bam', 'map_se/t1_r2_genes.bam', 'map_se/t1_r1_genome.bam', ...]
+    fnames('map_se', 'bam', key='name') ->
+        ['t1_r2_genome.bam', 't1_r2_genes.bam', 't1_r1_genome.bam', 'c1_r1_genes.bam', ...]
+    fnames('map_se', 'bam', key='stem') ->
+        ['t1_r2_genome', 't1_r2_genes', 't1_r1_genome', 'c1_r1_genes', 'c1_r1_genome', 't1_r1_genes']
+    fnames('map_se', 'bam', key='keys') ->
+        [['t1', 'r2', 'genome'], ['t1', 'r2', 'genes'], ['t1', 'r1', 'genome'], ['c1', 'r1', 'genes'], ...]
+    """
+    if isinstance(dir_or_files, (str,Path)):
+        if not pattern: pattern = '.*'
+        files = list(Path(dir_or_files).glob('*'))
+        files = list(map(str,files))
+        files = fnames_match(files, pattern, **wildcards)
+
+
+    # if isinstance(dir_or_files, list):
+    #     if not pattern: pattern = '*'
+    #     files = list(map(str,dir_or_files))
+    #     files = fnames_match(files, pattern, *wildcards)
+    #     #files = list(filter(lambda f: re.search(f'\.{suffix}$',f), files)) # check for extension
+
+
+    # if isinstance(dir_or_files, Iterator):
+    #     return fnames(list(dir_or_files), suffix, key)
+    # Remember to update signatue
+    return files
+    #return list(map(lambda f: fname_index(f)[key], files))
+
 def fname_index(path_or_file):
     """
     fname_index :: str -> dict

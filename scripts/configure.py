@@ -42,13 +42,12 @@ ToDo: Add additional functionality for other elements of `config.yaml`, includin
 from pathlib import Path
 from snakemake import load_configfile
 from collections import defaultdict
-from itertools import compress
+from cytoolz import concat
 
 home_path      = Path.cwd()/'..'
 config = load_configfile(home_path/"config.yaml")
 
 def parse_samples(config):
-    #read_ids = ["R1", "R2"]
     pairend_run_ids = []
     sample2data, group2sample, group2run  = defaultdict(dict), defaultdict(list), defaultdict(list)
     for s, v in config["samples"].items():
@@ -66,65 +65,69 @@ def parse_samples(config):
 sample2list, sample2data, group2sample, group2run, pairend_run_ids = parse_samples(config)
 
 
-def samples(n=2, se=True, extra=[]):
+def samples(n=2, end='se', extra=[]):
     """
     samples :: Int -> Bool -> [String] ->
     Generates iterators of sample names as defined in 'sample2data'
     - n=1 returns an iterator of biological replicates, sample(2) -> ['t1', 't2', 'c1']
     - n=2 (default) returns an iterator of biologial replicates and runs -> ['t1_r1', 't2_r1', 'c1_r1']
-    - se=True (default) filters for SE reads, se=False filters for PE reads
-    - keys=True returns an iterator of tuples of length 'n'. When iterated will require 'n' keys -> [('t1', 'r1'), ('t2', 'r1'), ('c1', 'r1')]
+    - end='se' (default) filters for SE reads, end='pe' filters for PE reads, end='all' returns all as a FLAT list.
     - extra=[alist] returns an iterator which is the Cartesian product of the elements of alist and the original iterator
 
     Example:
-    samples(se=True, keys=True, extra=['gene','genome']) ->
+    samples(end='se',extra=['gene','genome']) ->
      [('t1', 'r1', 'gene'), ('t1', 'r1', 'genome'), ('t2', 'r1', 'gene'), ('t2', 'r1', 'genome'), ('c1', 'r1', 'gene'), ('c1', 'r1', 'genome')]
     """
-    if n not in [1, 2]: return("usage: samples(n=2, keys=False, extra=False)")
-    if not isinstance(se,bool) : return("usage: samples(n=2, keys=False, extra=False)")
-    if not isinstance(extra, (list,tuple)): return("usage: samples(n=2, keys=False, extra=False)")
+    if n not in [1, 2]: return("usage: samples(n=2, end='se', extra=[])")
+    if end not in ['se','pe','all'] : return("usage: samples(n=2, end='se', extra=[])")
+    if not isinstance(extra, (list,tuple)): return("usage: samples(n=2, end='se', extra=[])")
 
-    # Same for se = True|False
+    # Same for end = 'se'|'pe'
     if n == 1:
         result = list(sample2data.keys())
         return result
         return result if not extra else [f'{s}_{e}' for s in result for e in extra]
 
-    if se == True:
+    if end == 'se':
         result = [f'{s}_{r}' for s,r,d in sample2list if len(d)==1]
         return result if not extra else [f'{s}_{e}' for s in result for e in extra]
 
-    if se == False:
+    if end == 'pe':
         result = [(f'{s}_{r}_R1',f'{s}_{r}_R2') for s,r,d in sample2list if len(d)==2]
         return result if not extra else [(f'{s1}_{e}',f'{s2}_{e}') for s1,s2 in result for e in extra]
 
-    return("usage: samples(n=2, keys=False, extra=False)")
+    if end == 'all':
+        return samples(n=n,end='se', extra=extra) + list(concat(samples(n=n,end='pe', extra=extra)))
 
-def data(se=True):
+    return("usage: samples(n=2, end='se', extra=[])")
+
+def data(end='se'):
     """
-    data :: Bool -> (String, Path) | ((String, Path), (String, Path))
+    data :: Bool -> [(String, Path)]
     Generates iterator of data paths as defined in `sample2list`
-    - type='SE' will filter for SE and return tuples of key with path to R1 sequence reads
-    - type='PE' will filter for PE and return tuples of a key with  paths to R1 and R2  sequence reads
+    - type='SE' will filter for SE -> [(key1, Path(R1)) ...]
+    - type='PE' will filter for PE -> [(key11, Path(R1)),(key12, Path(R2)) ...]
 
     Example:
     data() -> [('t1_r1', PosixPath('../data/test1_R1.fq.gz')),
                ('t2_r1', PosixPath('../data/test2_R1.fq.gz')),
                ('c1_r1', PosixPath('../data/test3_R1.fq.gz'))]
 
-    data(se=False) ->
+    data(end='pe') ->
               [(('t2_r1_R1', PosixPath('../data/SRR23538294_1.fq.gz')),
                 ('t2_r1_R2',PosixPath('../data/SRR23538294_2.fq.gz'))),
                (('t2_r2_R1',PosixPath('../data/SRR23538293_1.fq.gz')),
                 ('t2_r2_R2', PosixPath('../data/SRR23538293_2.fq.gz')))]
     """
-    if not isinstance(se,bool) : return("usage: data(se=True)")
-    if se == True:
+    if not end in ['se','pe','all'] : return("usage: data(end='se')")
+    if end == 'se':
         return  [(f'{s}_{r}', d[0]) for s,r,d in sample2list if len(d)==1]
-    if se == False:
+    if end == 'pe':
         result = [((f'{s}_{r}_R1',d[0]), (f'{s}_{r}_R2',d[1])) for s,r,d in sample2list if len(d)==2]
         return[(k,r) for k,r in [r for rs in result for r in rs]]
-    return("usage: data(se=True)")
+    if end == 'all':
+        return data(end='se') + data(end='pe')
+    return("usage: data(end='se')")
 
 
 def groups(n=2):
