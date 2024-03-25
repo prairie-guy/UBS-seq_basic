@@ -49,20 +49,27 @@ config = load_configfile(home_path/"config.yaml")
 
 def parse_samples(config):
     pairend_run_ids = []
-    sample2data, group2sample, group2run  = defaultdict(dict), defaultdict(list), defaultdict(list)
+    sample2data, group2sample, group2run, group2data  = defaultdict(dict), defaultdict(list), defaultdict(list),defaultdict(list)
     for s, v in config["samples"].items():
         group2sample[v["group"]].append(s)
         for i, v2 in enumerate(v["data"], 1):
             r = f"r{i}"
             group2run[v["group"]].append(f"{s}_{r}")
-            sample2data[s][r] = {k3: home_path/v3 for k3, v3 in v2.items()}  # Using string representation for simplicity
-            if len(v2) == 2:
+            sample2data[s][r] = {k3: home_path/v3 for k3, v3 in v2.items()}
+            k3 = list(v2.keys())
+            if len(k3) ==1:
+                group2data[v["group"]].append(f"{s}_{r}")
+            if len(k3) == 2:
+                group2data[v["group"]].append(f"{s}_{r}_{k3[0]}")
+                group2data[v["group"]].append(f"{s}_{r}_{k3[1]}")
                 pairend_run_ids.append(s + "_" + r)
+
     sample2list = [(sk,rk,list(rv.values())) for sk,sv in sample2data.items() for rk,rv in sv.items()]
-    return sample2list, sample2data, group2sample, group2run, pairend_run_ids
+    return sample2list, sample2data, group2sample, group2run, group2data, pairend_run_ids
+
 
 # Defines Sample Data Structures for Export
-sample2list, sample2data, group2sample, group2run, pairend_run_ids = parse_samples(config)
+sample2list, sample2data, group2sample, group2run, group2data, pairend_run_ids = parse_samples(config)
 
 
 def samples(n=2, end='se', extra=[]):
@@ -130,9 +137,7 @@ def data(end='se'):
     return("usage: data(end='se')")
 
 
-def groups(n=2):
-    if n == 1: return ((s, g) for g, items in group2sample.items() for s in items)
-    if n == 2: return ((s, g) for g, items in group2run.items() for s in items)
+
 
 # def samples2(n=2, se=True, keys=False, extra=[]):
 #     '''
