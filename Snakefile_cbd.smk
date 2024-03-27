@@ -99,7 +99,8 @@ rule join_pairend_reads:
         if len(input) == 2:
             shell(
                 """
-        fastp --thread {threads} --merge --correction --overlap_len_require 10 --overlap_diff_percent_limit 20 -i {input[0]} -I {input[1]} --merged_out {output.join} --out1 {output.un1} --out2 {output.un2} -h {params.html} -j {params.json}
+        fastp --thread {threads} --merge --correction --overlap_len_require 10 --overlap_diff_percent_limit 20 \
+                -i {input[0]} -I {input[1]} --merged_out {output.join} --out1 {output.un1} --out2 {output.un2} -h {params.html} -j {params.json}
         """
             )
         else:
