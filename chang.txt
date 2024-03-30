@@ -1,0 +1,36 @@
+Understanding logic:
+    1. All reads are read through join_paired_reads
+
+    2. len == 1 : SE -> ln -sf input[0]               -> join(merged_reads/{sample}_{rn}.fq.gz)
+       - Pass through, no processing
+
+    3. len == 2 : PE -> fastp -i input[0] -I input[1] join(merged_reads/{sample}_{rn}.fq.gz)
+       - fastp trims out adapters during merge, keeping Joined PE Reads (without adapters):  join=(merged_reads/{sample}_{rn}.fq.gz)
+       - fastp keeps untrimed reads as two files: un1=("merged_reads/{sample}_{rn}.un1.fq.gz"),
+
+    4. Unpaired PE (with adapters) -> cutadapt_PE
+      - So this is really a secondary pipeline.
+      - Most files are either SE or Joine PE handled by cut_adapt_SE -> hisat2_3n_mapping_genes
+
+    5. SE (with and without adapters) and Joined PE (without adapters) -> cutatapt_SE
+      - filter untrimmed (Joined PE (without adapters)) -> cut_adapter_SE/{sample}_{rn}.untrimmed.fq.gz (No more processing)
+      - Remaining reads (SE (with adapters)) -> SE (with adapters) are trimmed -> stdout -> cutadapt
+                                              -> SE (without adapters) -> cut_adapter_SE/{sample}_{rn}.untrimmed.fq.gz (No more processing)
+                                              Problem: All of the Joined PE (without adapters) are in untrimmed file
+
+Other Questions:
+   1. There do not appear to be barcodes in PE: 7ng of cfDNA treated with ultrafast BS, replicate 1 or 2
+   2. When filtering reads, do you only want Reads with Adapters? If not, why are you filtering for these?
+
+Scripts:
+    1. parse_cutadapt_report.py
+
+    2. select_called_sites_v3.py
+
+    3. combined_selected_sites.py
+
+    4. sumup_background_ratio.py
+
+    5. join_raw_table_v2.py
+
+    6. filter_table_by_pvalue.py

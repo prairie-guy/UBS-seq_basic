@@ -2,4 +2,4 @@
 
 cd $(dirname "$(readlink -f "$0")")
 cd ../workspace/
-rm -fr select_samples trim fastqc_post  fastqc_pre  map_se  map_se_pe map_combined call_converted  call_filtered_converted  dedup
+rm -fr select_samples fastqc_pre join_pe trim call_converted call_filtered_converted combined dedup fastqc_post map_pe map_se merge_pe_runs merge_se_runs
