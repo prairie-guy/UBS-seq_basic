@@ -39,10 +39,12 @@ These operators are NOT intended to be used for actual files. (Use fnames() in f
 ToDo: Add additional functionality for other elements of `config.yaml`, including `references`
 """
 
+import re
 from pathlib import Path
 from snakemake import load_configfile
+from snakemake.io import expand
 from collections import defaultdict
-from cytoolz import concat
+from cytoolz import concat, unique
 
 home_path      = Path.cwd()/'..'
 config = load_configfile(home_path/"config.yaml")
@@ -81,7 +83,8 @@ def samples(n=2, end='runs', extra=[]):
     - end='se' filters for SE reads -> ['t1_r1', 't1_r2', 'c1_r1']
     - end='pe' filters for pairs of PE reads -> [('t2_r1_R1', 't2_r1_R2'), ('t2_r2_R1', 't2_r2_R2')]
     - end='all' returns all (flat) -> ['t1_r1', 't1_r2', 'c1_r1', 't2_r1_R1', 't2_r1_R2', 't2_r2_R1', 't2_r2_R2']
-    - end='runs' biologial replicates with run -> (i.e., runs) -> ['t1_r1', 't1_r2', 't2_r1', 't2_r2', 'c1_r1']
+    - end='runs' biologial replicates by run -> (i.e., runs) -> ['t1_r1', 't1_r2', 't2_r1', 't2_r2', 'c1_r1']
+    - end='pe_runs' pe biological replicates by run -> ['t2_r1', 't2_r2']
     - extra=[alist] returns an iterator which is the Cartesian product of the elements of alist and the original iterator
 
     Example:
@@ -89,7 +92,7 @@ def samples(n=2, end='runs', extra=[]):
      [('t1', 'r1', 'gene'), ('t1', 'r1', 'genome'), ('t2', 'r1', 'gene'), ('t2', 'r1', 'genome'), ('c1', 'r1', 'gene'), ('c1', 'r1', 'genome')]
     """
     if n not in [1, 2]: return("usage: samples(n=2, end='se', extra=[])")
-    if end not in ['se','pe','all','runs'] : return("usage: samples(n=2, end='se', extra=[])")
+    if end not in ['se','pe','all','runs','pe_runs'] : return("usage: samples(n=2, end='se', extra=[])")
     if not isinstance(extra, (list,tuple)): return("usage: samples(n=2, end='se', extra=[])")
 
     # Same for end = 'se'|'pe'
@@ -113,7 +116,22 @@ def samples(n=2, end='runs', extra=[]):
         result = [f'{s}_{r}' for s,r,d in sample2list]
         return result if not extra else [f'{s}_{e}' for s in result for e in extra]
 
+    if end == 'pe_runs':
+        result = list(concat(samples(end='pe',extra=extra)))
+        result =list(map(lambda string: re.sub(r'_(?:R1|R2)(?=_|$)', '', string),
+                        result))
+        return list(unique(result))
+
     return("usage: samples(n=2, end='se', extra=[])")
+
+def data2run(string):
+    """
+    data2run :: String -> String
+    Return `run` of `data` label
+    Example:
+    data2run('t2_r1_R1_genes',) -> 't2_r1_genes
+    """
+    return re.sub(r'_(?:R1|R2)(?=_|$)', '', string)
 
 def data(end='se'):
     """

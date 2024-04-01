@@ -48,20 +48,20 @@ from pathlib import Path
 from collections.abc import Iterator
 from operator import itemgetter as items
 
-def fname(path, stem, suffix, tail=''):
+def fname(path, stem, suffix, extra=''):
     """
     fname :: str  -> str -> str -> Path
     fname :: Path -> str -> str -> Path
 
     Return a new Path comprised of a `path`, `stem` and `suffix`
-    `tail` appends str to end of stem. Default: tail=''
+    `extra` appends str to end of stem. Default: extra=''
 
     Example:
     fname(in_path, 't1_r1', 'bam')          -> Path('some_path/t1_r1.bam)
     fname(in_path, 't1_r1', 'bam', 'genes') -> Path('some_path/t1_r1_genes.bam)
     """
 
-    return Path(path)/f"{stem}.{suffix}" if not tail else Path(path)/f"{stem}_{tail}.{suffix}"
+    return Path(path)/f"{stem}.{suffix}" if not extra else Path(path)/f"{stem}_{extra}.{suffix}"
 
 def mkpath(path):
     """
@@ -170,7 +170,7 @@ def fnames_string(dir_or_files, delimiter=' '):
 
     Returns a string concatenated from file names delimited by `delimiter`
     """
-    files = fnames(dir_or_files)
+    files = fnames(dir_or_files,key='full')
     return delimiter.join(files)
 
 

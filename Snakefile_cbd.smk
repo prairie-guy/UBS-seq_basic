@@ -200,6 +200,8 @@ rule cutadapt_SE:
             -o {output.fastq_cut} - >{output.report2}
         """
             )
+
+            <<CDB2: This is the strategy to use without barcode. Though it still is assumed to be looking for adapters>>
         elif LIBRARY_STRATEGY == "TAKARAV3":
             # p5 - 14nttUMI - reverse insert - p7
             shell(
