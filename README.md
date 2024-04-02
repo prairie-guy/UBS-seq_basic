@@ -10,24 +10,49 @@ Basic assumptions are made about the form of the file structure so that only not
 .
 ├── config.yaml
 ├── data
-│   └── README_data.md
+│   ├── 41587_2023_2034_MOESM4_ESM.xlsx
+│   ├── README_data.md
+├── dir_tree
 ├── environment.yaml
+├── img
+│   └── adapter.png
 ├── README.md
-|── reference
-|   └── README_reference.md
+├── reference
+│   ├── genome
+│   ├── index
+│   └── README_reference.md
+├── samples_info.txt
+├── samples.org
 ├── scripts
-│   ├── clean.sh
-│   ├── downsample.sh
-│   ├── generate_reference.sh
-│   ├── nb2py.sh
-│   ├── README_scripts.md
-│   └── run_ubs_seq.sh
+│   ├── configure.py
+│   ├── downsample.sh
+│   ├── find_barcodes.sh
+│   ├── fnames.py
+│   ├── generate_reference.sh
+│   ├── map_se -> ../workspace/map_se
+│   ├── nb2py.sh
+│   ├── __pycache__
+│   ├── README_scripts.md
+│   ├── run_ubs_seq.sh
+│   └── utils.py
+├── Snakefile
 ├── src
-│   └── README_IGV_WEB.md
+│   └── README_IGV_WEB.md
 └── workspace
+    ├── calc_methy
+    ├── call_converted
+    ├── call_filtered_converted
+    ├── dedup
+    ├── fastqc_post
+    ├── fastqc_pre
+    ├── filter_calls
+    ├── join_pe
+    ├── map_se
+    ├── merge_se_runs
     ├── README_workspace.md
-    ├── ubs_basic.ipynb
-    └── ubs_basic.py
+    ├── select_samples
+    ├── trim
+    └── ubs_basic.ipynb
 ```
 
 
@@ -63,14 +88,18 @@ workspace/*
 # UBS-seq_basic
 
 The purpose of this project is run a minimally viable UBS-seq pipline. For simplicity, it will run several single-end samples, mapping only to the genome. The core steps of the pipeline are:
-- cut_apapter
-- quality_control
-- align2ref
-- sort2ref
-- dedupe
-- filter->all_multi_unique
-- call_peaks
-- select_groups
+
+- select_samples
+- fastqc_pre
+- join_pe
+- trim
+- fastqc_post
+- map_se
+- merge_se_runs
+- dedup
+- call_converted
+- call_filtered_converted
+- calc_methy
 - analysis_and_annotation
 
 This pipeline is based upon the paper by [Qing Dai, etal](https://doi.org/10.1038/s41587-023-02034-w) and the UBS-seq pipeline developed by [Chang Ye](https://github.com/y9c/m5C-UBSseq)
