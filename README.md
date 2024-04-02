@@ -5,7 +5,7 @@ This is an example of a Jupyter notebook template meant to be edited to create n
 Basic assumptions are made about the form of the file structure so that only notebooks, scripts and other elements of the pipeline are saved to github. The large genomic reference files and intermediate workspace directories are ignored by github. If necessary, these files can be saved locally. 
 
 ### UBSseq Pipeline Jupyter Notebook
-[workspace/ubs_basic.ipynb](UBSseq Pipeline)
+[UBSseq Pipeline](workspace/ubs_basic.ipynb) 
 
 ### Github File Structure
 
