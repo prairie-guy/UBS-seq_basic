@@ -14,6 +14,7 @@ workspace_old/
 workspace_older/
 workspace_2
 workspace2
+.ipynb_checkpoints/
 .*~
 .snakemake/
 src/hisat-3n/
